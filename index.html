@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radinho Radar - 2 Times</title>
+<style>
+body { font-family: Arial; background-color: #111; color: #fff; margin: 0; padding: 10px; }
+h1 { text-align: center; margin-bottom: 10px; }
+.input-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+input[type="text"] { padding: 8px 12px; font-size: 16px; border-radius: 5px; border: none; width: 140px; }
+.radar-container { display: flex; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; gap: 10px; }
+.radar-button { display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 50%; border: none; cursor: pointer; font-size: 12px; color: #fff; font-weight: bold; text-align: center; }
+.team-label { text-align: center; margin-bottom: 5px; }
+.event-list { max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+.event-card { display: flex; align-items: center; padding: 6px 8px; border-radius: 8px; background-color: #222; }
+.event-color { border-radius: 50%; flex-shrink: 0; width: 10px; height: 10px; margin-right: 10px; }
+.event-text { font-size: 16px; color: #fff; font-weight: bold; }
+.open-window-btn { display: block; margin: 10px auto 20px auto; padding: 10px 20px; font-size: 16px; border: none; border-radius: 20px; background-color: #2980b9; color: #fff; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<h1>Radinho Radar - 2 Times</h1>
+
+<div class="input-container">
+    <input type="text" id="teamA" placeholder="Nome do Time A">
+    <input type="text" id="teamB" placeholder="Nome do Time B">
+    <button class="open-window-btn" onclick="abrirJanelaDados()">Abrir Janela de Dados</button>
+</div>
+
+<div class="team-label">Time A</div>
+<div class="radar-container" id="buttonsTeamA">
+    <button class="radar-button" style="background-color:#27ae60;" onclick="adicionarEvento('Meta','A')">Meta</button>
+    <button class="radar-button" style="background-color:#3498db;" onclick="adicionarEvento('Goleiro','A')">Goleiro</button>
+    <button class="radar-button" style="background-color:#2ecc71;" onclick="adicionarEvento('Defesa','A')">Defesa</button>
+    <button class="radar-button" style="background-color:#f1c40f;" onclick="adicionarEvento('Ataque','A')">Ataque</button>
+    <button class="radar-button" style="background-color:#e74c3c;" onclick="adicionarEvento('Perigoso','A')">Perigoso</button>
+    <button class="radar-button" style="background-color:#f1c40f;" onclick="adicionarEvento('Lateral','A')">Lateral</button>
+    <button class="radar-button" style="background-color:#f1c40f;" onclick="adicionarEvento('Falta','A')">Falta</button>
+    <button class="radar-button" style="background-color:#2ecc71;" onclick="adicionarEvento('Gol','A')">Gol</button>
+</div>
+
+<div class="team-label">Time B</div>
+<div class="radar-container" id="buttonsTeamB">
+    <button class="radar-button" style="background-color:#27ae60;" onclick="adicionarEvento('Meta','B')">Meta</button>
+    <button class="radar-button" style="background-color:#3498db;" onclick="adicionarEvento('Goleiro','B')">Goleiro</button>
+    <button class="radar-button" style="background-color:#2ecc71;" onclick="adicionarEvento('Defesa','B')">Defesa</button>
+    <button class="radar-button" style="background-color:#f1c40f;" onclick="adicionarEvento('Ataque','B')">Ataque</button>
+    <button class="radar-button" style="background-color:#e74c3c;" onclick="adicionarEvento('Perigoso','B')">Perigoso</button>
+    <button class="radar-button" style="background-color:#f1c40f;" onclick="adicionarEvento('Lateral','B')">Lateral</button>
+    <button class="radar-button" style="background-color:#f1c40f;" onclick="adicionarEvento('Falta','B')">Falta</button>
+    <button class="radar-button" style="background-color:#2ecc71;" onclick="adicionarEvento('Gol','B')">Gol</button>
+</div>
+
+<div class="event-list" id="eventList"></div>
+
+<script>
+const cores = { Meta:'#27ae60', Goleiro:'#3498db', Defesa:'#2ecc71', Ataque:'#f1c40f', Perigoso:'#e74c3c', Lateral:'#f1c40f', Falta:'#f1c40f', Gol:'#2ecc71' };
+let eventos = [];
+let janelaDados = null;
+
+function adicionarEvento(evento, time){
+    const teamA = document.getElementById('teamA').value.trim() || "TimeA";
+    const teamB = document.getElementById('teamB').value.trim() || "TimeB";
+    const teamName = (time==='A')? teamA : teamB;
+
+    const eventList = document.getElementById('eventList');
+    const card = document.createElement('div');
+    card.className = 'event-card';
+    const colorDiv = document.createElement('div');
+    colorDiv.className = 'event-color';
+    colorDiv.style.backgroundColor = cores[evento];
+    colorDiv.style.width = "10px";
+    colorDiv.style.height = "10px";
+    const textDiv = document.createElement('div');
+    textDiv.className = 'event-text';
+    textDiv.textContent = `${evento} ${teamName}`;
+    card.appendChild(colorDiv);
+    card.appendChild(textDiv);
+    eventList.prepend(card);
+
+    eventos.unshift({evento,time:teamName});
+    if(eventos.length>10) eventos.pop();
+
+    atualizarJanela();
+}
+
+function abrirJanelaDados(){
+    if(!janelaDados || janelaDados.closed){
+        janelaDados = window.open("","RadarDados","width=300,height=400,scrollbars=yes");
+        janelaDados.document.write(`
+            <html>
+            <head>
+            <title>Radar</title>
+            <style>
+                body{background-color:#111;color:#fff;font-family:Arial;padding:10px;}
+                h2{text-align:center;}
+                .event-card{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:6px;border-radius:8px;background-color:#222;}
+                .event-color{border-radius:50%;flex-shrink:0;width:10px;height:10px;}
+                .event-text{font-size:16px;color:white;font-weight:bold;}
+            </style>
+            </head>
+            <body>
+                <h2>Radar</h2>
+                <div id="dadosContainer"></div>
+            </body>
+            </html>
+        `);
+    }
+    atualizarJanela();
+}
+
+function atualizarJanela(){
+    if(janelaDados && !janelaDados.closed){
+        const container = janelaDados.document.getElementById('dadosContainer');
+        if(container){
+            container.innerHTML = eventos.map(ev=>`
+                <div class="event-card">
+                    <div class="event-color" style="background-color:${cores[ev.evento]};"></div>
+                    <div class="event-text">${ev.evento} ${ev.time}</div>
+                </div>
+            `).join('');
+        }
+    }
+}
+</script>
+
+</body>
+</html>
