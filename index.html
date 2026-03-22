@@ -7,7 +7,7 @@
 <style>
 body { font-family: Arial; background-color: #111; color: #fff; margin: 0; padding: 10px; }
 h1 { text-align: center; margin-bottom: 10px; }
-.input-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+.input-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
 input[type="text"] { padding: 8px 12px; font-size: 16px; border-radius: 5px; border: none; width: 140px; }
 .radar-container { display: flex; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; gap: 10px; }
 .radar-button { display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 50%; border: none; cursor: pointer; font-size: 12px; color: #fff; font-weight: bold; text-align: center; }
@@ -55,37 +55,64 @@ input[type="text"] { padding: 8px 12px; font-size: 16px; border-radius: 5px; bor
 
 <div class="event-list" id="eventList"></div>
 
+<!-- Firebase SDK compatível para HTML -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <script>
 const cores = { Meta:'#27ae60', Goleiro:'#3498db', Defesa:'#2ecc71', Ataque:'#f1c40f', Perigoso:'#e74c3c', Lateral:'#f1c40f', Falta:'#f1c40f', Gol:'#2ecc71' };
-let eventos = [];
+
+// 🔹 Substitua o databaseURL com o do seu Realtime Database
+const firebaseConfig = {
+  apiKey: "AIzaSyCz6YUc4GHbAHu5neKFUXOy2geO8gICUXo",
+  authDomain: "radin-radar.firebaseapp.com",
+  databaseURL: "https://radin-radar-default-rtdb.firebaseio.com",
+  projectId: "radin-radar",
+  storageBucket: "radin-radar.firebasestorage.app",
+  messagingSenderId: "821989748818",
+  appId: "1:821989748818:web:895cde8f6a730fc59def8b",
+  measurementId: "G-1Z7BP88YD3"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
 let janelaDados = null;
 
+// Envia evento para Firebase
 function adicionarEvento(evento, time){
     const teamA = document.getElementById('teamA').value.trim() || "TimeA";
     const teamB = document.getElementById('teamB').value.trim() || "TimeB";
     const teamName = (time==='A')? teamA : teamB;
 
-    const eventList = document.getElementById('eventList');
-    const card = document.createElement('div');
-    card.className = 'event-card';
-    const colorDiv = document.createElement('div');
-    colorDiv.className = 'event-color';
-    colorDiv.style.backgroundColor = cores[evento];
-    colorDiv.style.width = "10px";
-    colorDiv.style.height = "10px";
-    const textDiv = document.createElement('div');
-    textDiv.className = 'event-text';
-    textDiv.textContent = `${evento} ${teamName}`;
-    card.appendChild(colorDiv);
-    card.appendChild(textDiv);
-    eventList.prepend(card);
-
-    eventos.unshift({evento,time:teamName});
-    if(eventos.length>10) eventos.pop();
-
-    atualizarJanela();
+    const novoEvento = { evento, team: teamName, timestamp: Date.now() };
+    db.ref('eventos').push(novoEvento);
 }
 
+// Atualiza lista de eventos em tempo real
+db.ref('eventos').on('value', snapshot => {
+    const eventosData = snapshot.val();
+    const eventList = document.getElementById('eventList');
+    eventList.innerHTML = '';
+    for (let key in eventosData) {
+        const ev = eventosData[key];
+        const card = document.createElement('div');
+        card.className = 'event-card';
+        const colorDiv = document.createElement('div');
+        colorDiv.className = 'event-color';
+        colorDiv.style.backgroundColor = cores[ev.evento];
+        colorDiv.style.width = "10px";
+        colorDiv.style.height = "10px";
+        const textDiv = document.createElement('div');
+        textDiv.className = 'event-text';
+        textDiv.textContent = `${ev.evento} ${ev.team}`;
+        card.appendChild(colorDiv);
+        card.appendChild(textDiv);
+        eventList.prepend(card);
+    }
+    atualizarJanela();
+});
+
+// Radar em janela
 function abrirJanelaDados(){
     if(!janelaDados || janelaDados.closed){
         janelaDados = window.open("","RadarDados","width=300,height=400,scrollbars=yes");
@@ -115,12 +142,9 @@ function atualizarJanela(){
     if(janelaDados && !janelaDados.closed){
         const container = janelaDados.document.getElementById('dadosContainer');
         if(container){
-            container.innerHTML = eventos.map(ev=>`
-                <div class="event-card">
-                    <div class="event-color" style="background-color:${cores[ev.evento]};"></div>
-                    <div class="event-text">${ev.evento} ${ev.time}</div>
-                </div>
-            `).join('');
+            const cards = document.querySelectorAll('.event-card');
+            container.innerHTML = '';
+            cards.forEach(card => container.appendChild(card.cloneNode(true)));
         }
     }
 }
