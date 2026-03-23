@@ -21,7 +21,7 @@ h1 { margin-bottom: 10px; }
     display: flex;
     justify-content: center;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     flex-wrap: wrap;
 }
 
@@ -49,6 +49,7 @@ input {
 
 .clear { background: #e74c3c; color: white; }
 .undo { background: #f1c40f; color: black; }
+.window { background: #2980b9; color: white; }
 
 .team-label {
     margin: 10px 0 5px 0;
@@ -109,6 +110,7 @@ input {
 <div class="controls">
     <button class="control-btn clear" onclick="limparTudo()">Limpar Tudo</button>
     <button class="control-btn undo" onclick="desfazerUltimo()">Desfazer Último</button>
+    <button class="control-btn window" onclick="abrirJanela()">Abrir Radar</button>
 </div>
 
 <div class="team-label">Time A</div>
@@ -167,6 +169,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+let janela = null;
+
 function add(evento, time){
     const teamA = document.getElementById('teamA').value || "Time A";
     const teamB = document.getElementById('teamB').value || "Time B";
@@ -179,7 +183,7 @@ function add(evento, time){
     });
 }
 
-// atualizar lista
+// Atualiza tela principal + janela
 db.ref('eventos').on('value', snap => {
     const data = snap.val();
     const list = document.getElementById('eventList');
@@ -198,7 +202,42 @@ db.ref('eventos').on('value', snap => {
 
         list.prepend(div);
     }
+
+    atualizarJanela();
 });
+
+// 🔥 MODO JANELA
+function abrirJanela(){
+    if(!janela || janela.closed){
+        janela = window.open("", "Radar", "width=300,height=400");
+
+        janela.document.write(`
+            <html>
+            <head>
+            <style>
+            body{background:#111;color:#fff;font-family:Arial;padding:10px;}
+            .event{display:flex;gap:10px;margin-bottom:8px;}
+            .dot{width:10px;height:10px;border-radius:50%;}
+            </style>
+            </head>
+            <body>
+            <h3>Radar</h3>
+            <div id="lista"></div>
+            </body>
+            </html>
+        `);
+    }
+    atualizarJanela();
+}
+
+function atualizarJanela(){
+    if(janela && !janela.closed){
+        const lista = janela.document.getElementById('lista');
+        if(!lista) return;
+
+        lista.innerHTML = document.getElementById('eventList').innerHTML;
+    }
+}
 
 // limpar tudo
 function limparTudo(){
