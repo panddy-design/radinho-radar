@@ -15,8 +15,6 @@ body {
     text-align: center;
 }
 
-h1 { margin-bottom: 10px; }
-
 .input-container {
     display: flex;
     justify-content: center;
@@ -47,9 +45,10 @@ input {
     font-weight: bold;
 }
 
-.clear { background: #e74c3c; }
-.undo { background: #f1c40f; color: #000; }
-.window { background: #2980b9; }
+.clear { background: #e74c3c; color:#fff; }
+.undo { background: #f1c40f; color:#000; }
+.window { background: #2980b9; color:#fff; }
+.time { background: #8e44ad; color:#fff; }
 
 .team-label {
     margin: 10px 0 5px 0;
@@ -65,14 +64,19 @@ input {
 }
 
 .radar-button {
-    width: 70px;
-    height: 70px;
-    border-radius: 12px;
+    width: 80px;
+    height: 80px;
+    border-radius: 14px;
     border: none;
     cursor: pointer;
     font-size: 12px;
     color: #fff;
     font-weight: bold;
+    transition: transform 0.1s ease;
+}
+
+.radar-button:active {
+    transform: scale(0.95);
 }
 
 .event-list {
@@ -99,19 +103,21 @@ input {
 </head>
 
 <body>
+
 <div class="input-container">
     <input id="teamA" placeholder="Time A">
     <input id="teamB" placeholder="Time B">
 </div>
 
 <div class="controls">
-    <button class="control-btn clear" onclick="limparTudo()">Limpar Tudo</button>
-    <button class="control-btn undo" onclick="desfazerUltimo()">Desfazer Último</button>
-    <button class="control-btn window" onclick="abrirJanela()">Abrir Radar</button>
+    <button class="control-btn clear" onclick="limparTudo()">Limpar</button>
+    <button class="control-btn undo" onclick="desfazerUltimo()">Desfazer</button>
+    <button class="control-btn window" onclick="abrirJanela()">Radar</button>
+    <button class="control-btn time" onclick="addTempo()">Tempo</button>
 </div>
 
 <!-- TIME A -->
-<div class="team-label">Time A</div>
+<div class="team-label" id="labelA">Time A</div>
 <div class="radar-container">
     <button class="radar-button" style="background:#27ae60" onclick="add('Meta','A')">Meta</button>
     <button class="radar-button" style="background:#3498db" onclick="add('Goleiro','A')">Goleiro</button>
@@ -125,10 +131,12 @@ input {
 
     <button class="radar-button" style="background:#16a085" onclick="add('Canto','A')">Canto</button>
     <button class="radar-button" style="background:#2ecc71" onclick="add('Gol!','A')">Gol!</button>
+    <button class="radar-button" style="background:#e74c3c" onclick="add('Parado','A')">Parado</button>
+    <button class="radar-button" style="background:#95a5a6" onclick="add('Substituição','A')">Sub</button>
 </div>
 
 <!-- TIME B -->
-<div class="team-label">Time B</div>
+<div class="team-label" id="labelB">Time B</div>
 <div class="radar-container">
     <button class="radar-button" style="background:#27ae60" onclick="add('Meta','B')">Meta</button>
     <button class="radar-button" style="background:#3498db" onclick="add('Goleiro','B')">Goleiro</button>
@@ -142,6 +150,8 @@ input {
 
     <button class="radar-button" style="background:#16a085" onclick="add('Canto','B')">Canto</button>
     <button class="radar-button" style="background:#2ecc71" onclick="add('Gol!','B')">Gol!</button>
+    <button class="radar-button" style="background:#e74c3c" onclick="add('Parado','B')">Parado</button>
+    <button class="radar-button" style="background:#95a5a6" onclick="add('Substituição','B')">Sub</button>
 </div>
 
 <div id="eventList" class="event-list"></div>
@@ -154,17 +164,16 @@ const cores = {
     Meta:'#27ae60', Goleiro:'#3498db', Defesa:'#2ecc71',
     Ataque:'#f1c40f', Perigoso:'#e74c3c',
     Lateral:'#f1c40f', Falta:'#f39c12',
-    'Gol!':'#2ecc71', Offside:'#9b59b6', Canto:'#16a085'
+    'Gol!':'#2ecc71', Offside:'#9b59b6',
+    Canto:'#16a085', Parado:'#e74c3c',
+    'Substituição':'#95a5a6', Tempo:'#8e44ad'
 };
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCz6YUc4GHbAHu5neKFUXOy2geO8gICUXo",
+  apiKey: "AIza...",
   authDomain: "radin-radar.firebaseapp.com",
   databaseURL: "https://radin-radar-default-rtdb.firebaseio.com",
-  projectId: "radin-radar",
-  storageBucket: "radin-radar.firebasestorage.app",
-  messagingSenderId: "821989748818",
-  appId: "1:821989748818:web:895cde8f6a730fc59def8b"
+  projectId: "radin-radar"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -172,16 +181,53 @@ const db = firebase.database();
 
 let janela = null;
 
+// TEMPO SEM TIME
+function addTempo(){
+    db.ref('eventos').push({
+        evento: 'Tempo',
+        team: '',
+        timestamp: Date.now()
+    });
+}
+
+// PARADO INTELIGENTE
 function add(evento, time){
     const teamA = document.getElementById('teamA').value || "Time A";
     const teamB = document.getElementById('teamB').value || "Time B";
     const team = time === 'A' ? teamA : teamB;
 
-    db.ref('eventos').push({
-        evento,
-        team,
-        timestamp: Date.now()
-    });
+    const ref = db.ref('eventos');
+
+    if(evento !== 'Parado'){
+        ref.orderByChild('team').equalTo(team).once('value', snap => {
+            let ultimoParadoKey = null;
+            let ultimoTempo = 0;
+
+            snap.forEach(child => {
+                const val = child.val();
+                if(val.evento === 'Parado' && val.timestamp > ultimoTempo){
+                    ultimoTempo = val.timestamp;
+                    ultimoParadoKey = child.key;
+                }
+            });
+
+            if(ultimoParadoKey){
+                ref.child(ultimoParadoKey).remove();
+            }
+
+            enviar();
+        });
+    } else {
+        enviar();
+    }
+
+    function enviar(){
+        ref.push({
+            evento,
+            team,
+            timestamp: Date.now()
+        });
+    }
 }
 
 db.ref('eventos').on('value', snap => {
@@ -192,12 +238,16 @@ db.ref('eventos').on('value', snap => {
     for (let k in data){
         const e = data[k];
 
+        const texto = e.evento === 'Tempo'
+            ? `Tempo`
+            : `${e.evento} ${e.team}`;
+
         const div = document.createElement('div');
         div.className = 'event-card';
 
         div.innerHTML = `
             <div class="event-color" style="background:${cores[e.evento]}"></div>
-            ${e.evento} ${e.team}
+            ${texto}
         `;
 
         list.prepend(div);
@@ -205,6 +255,11 @@ db.ref('eventos').on('value', snap => {
 
     atualizarJanela();
 });
+
+setInterval(()=>{
+    document.getElementById('labelA').innerText = document.getElementById('teamA').value || "Time A";
+    document.getElementById('labelB').innerText = document.getElementById('teamB').value || "Time B";
+},500);
 
 function abrirJanela(){
     if(!janela || janela.closed){
