@@ -87,14 +87,14 @@ input {
     border-radius: 14px;
     position: relative;
     display: flex;
-    flex-direction: column; /* Organiza texto em cima e ícone embaixo */
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    padding-top: 10px; /* Espaço para o texto não colar na borda */
+    padding-top: 10px;
 }
 
-/* IMAGENS NOS BOTÕES - FORÇANDO 35x35px */
+/* IMAGENS NOS BOTÕES - 35x35px */
 .btn-icon-img {
     width: 35px !important; 
     height: 35px !important;
@@ -102,24 +102,22 @@ input {
     min-height: 35px;
     object-fit: contain;
     pointer-events: none;
-    margin-top: 5px; /* Empurra o ícone um pouco para baixo do texto */
+    margin-top: 5px;
 }
 
-/* TEXTO DOS BOTÕES - CENTRALIZADO NO TOPO */
+/* TEXTO DOS BOTÕES - CENTRALIZADO */
 .btn-text {
     position: absolute;
     top: 6px;
     width: 100%;
     left: 0;
-    text-align: center; /* Centraliza o texto horizontalmente */
+    text-align: center;
     font-size: 9px;
     text-transform: uppercase;
     color: #bbb;
     pointer-events: none;
     letter-spacing: 0.5px;
 }
-
-/* REMOVIDO A INVERSÃO ANTERIOR PARA MANTER TUDO CENTRALIZADO IGUAL */
 
 .radar-button.editando {
     border: 2px dashed #007bff !important;
@@ -139,13 +137,14 @@ input {
     border-radius: 8px;
     background: linear-gradient(90deg, #1a1a1a, #2a2a2a);
     border: 1px solid #333;
+    text-align: left;
 }
 
 .radar-list-img {
     width: 20px;
     height: 20px;
     object-fit: contain;
-    margin-right: 10px;
+    margin-right: 5px;
 }
 </style>
 </head>
@@ -188,20 +187,20 @@ input {
 
 <div class="team-label">Fora</div>
 <div class="radar-container" id="container-fora">
-    <button class="radar-button btn-estilo-padrao" onclick="add('Meta','B')"><span class="btn-text">Meta</span><img src="meta.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Offside','B')"><span class="btn-text">Offside</span><img src="offside.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Lateral','B')"><span class="btn-text">Lateral</span><img src="lateral.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Canto','B')"><span class="btn-text">Canto</span><img src="canto.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Meta','B')"><span class="btn-text">Meta</span><img src="meta.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Offside','B')"><span class="btn-text">Offside</span><img src="offside.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Lateral','B')"><span class="btn-text">Lateral</span><img src="lateral.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Canto','B')"><span class="btn-text">Canto</span><img src="canto.png" class="btn-icon-img"></button>
     
-    <button class="radar-button btn-estilo-padrao" onclick="add('Goleiro','B')"><span class="btn-text">Goleiro</span><img src="goleiro.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Defesa','B')"><span class="btn-text">Defesa</span><img src="defesa-fora.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Ataque','B')"><span class="btn-text">Ataque</span><img src="ataque-fora.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Perigoso','B')"><span class="btn-text">Perigoso</span><img src="perigoso-fora.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Goleiro','B')"><span class="btn-text">Goleiro</span><img src="goleiro.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Defesa','B')"><span class="btn-text">Defesa</span><img src="defesa-fora.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Ataque','B')"><span class="btn-text">Ataque</span><img src="ataque-fora.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Perigoso','B')"><span class="btn-text">Perigoso</span><img src="perigoso-fora.png" class="btn-icon-img"></button>
     
-    <button class="radar-button btn-estilo-padrao" onclick="add('Parado','B')"><span class="btn-text">Parado</span><img src="parado.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Substituição','B')"><span class="btn-text">Sub</span><img src="sub.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Falta','B')"><span class="btn-text">Falta</span><img src="falta.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Gol!','B')"><span class="btn-text">Gol!</span><img src="bola.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Parado','B')"><span class="btn-text">Parado</span><img src="parado.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Substituição','B')"><span class="btn-text">Sub</span><img src="sub.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Falta','B')"><span class="btn-text">Falta</span><img src="falta.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Gol!','B')"><span class="btn-text">Gol!</span><img src="bola.png" class="btn-icon-img"></button>
 </div>
 
 <div id="eventList" class="event-list"></div>
@@ -218,6 +217,7 @@ const iconesBase = {
 
 let editMode = false;
 let draggedItem = null;
+let janelaRadar = null;
 
 function toggleEdicao() {
     editMode = !editMode;
@@ -227,6 +227,7 @@ function toggleEdicao() {
     });
 }
 
+// Drag and Drop
 document.querySelectorAll('.radar-container').forEach(container => {
     container.addEventListener('dragstart', e => { if(editMode) draggedItem = e.target.closest('.radar-button'); });
     container.addEventListener('dragover', e => { if(editMode) e.preventDefault(); });
@@ -243,6 +244,7 @@ document.querySelectorAll('.radar-container').forEach(container => {
     });
 });
 
+// Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCz6YUc4GHbAHu5neKFUXOy2geO8gICUXo",
   authDomain: "radin-radar.firebaseapp.com",
@@ -271,36 +273,73 @@ function add(evento, time){
 
 function addTempo() { db.ref('eventos').push({ evento:'Tempo', team:'', timestamp: Date.now() }); }
 
+// Atualização em Tempo Real
 db.ref('eventos').on('value', snap => {
     const list = document.getElementById('eventList');
     list.innerHTML = '';
     const data = snap.val();
     const teamA_Name = document.getElementById('teamA').value || "Casa";
 
-    for (let k in data){
-        const e = data[k];
-        const div = document.createElement('div');
-        div.className = 'event-card';
-        let img = iconesBase[e.evento];
-        
-        if(['Defesa', 'Ataque', 'Perigoso'].includes(e.evento)){
-            const sufixo = (e.team === teamA_Name || e.teamType === 'A') ? '-casa.png' : '-fora.png';
-            img = e.evento.toLowerCase() + sufixo;
-        }
-
-        const iconHTML = (img && img.includes('.png')) 
-            ? `<img src="${img}" class="radar-list-img">` 
-            : `<span>${img || '•'}</span>`;
+    if (data) {
+        for (let k in data){
+            const e = data[k];
+            const div = document.createElement('div');
+            div.className = 'event-card';
+            let img = iconesBase[e.evento];
             
-        div.innerHTML = `${iconHTML} ${e.evento === 'Tempo' ? 'Tempo' : e.evento + ' ' + e.team}`;
-        list.prepend(div);
+            if(['Defesa', 'Ataque', 'Perigoso'].includes(e.evento)){
+                const sufixo = (e.team === teamA_Name || e.teamType === 'A') ? '-casa.png' : '-fora.png';
+                img = e.evento.toLowerCase() + sufixo;
+            }
+
+            const iconHTML = (img && img.includes('.png')) 
+                ? `<img src="${img}" class="radar-list-img">` 
+                : `<span>${img || '•'}</span>`;
+                
+            div.innerHTML = `${iconHTML} ${e.evento === 'Tempo' ? 'Tempo' : e.evento + ' ' + e.team}`;
+            list.prepend(div);
+        }
     }
+    atualizarJanelaExterna();
 });
 
-let janela = null;
+// MODO JANELA
 function abrirJanela(){
-    janela = window.open("", "Radar", "width=320,height=500");
-    janela.document.write('<html><head><style>body{background:#111;color:#fff;font-family:Arial;padding:10px;}.event-card{display:flex;align-items:center;padding:8px;margin-bottom:8px;border-radius:8px;background:linear-gradient(90deg,#1a1a1a,#2a2a2a);}.radar-list-img{width:20px;height:20px;margin-right:10px;}</style></head><body><div id="lista"></div></body></html>');
+    if(!janelaRadar || janelaRadar.closed){
+        janelaRadar = window.open("", "RadarWindow", "width=350,height=600");
+        
+        janelaRadar.document.write(`
+            <html>
+            <head>
+                <title>Radar Externo</title>
+                <style>
+                    body { background: #111; color: #fff; font-family: Arial, sans-serif; padding: 15px; margin: 0; }
+                    .event-card { 
+                        display: flex; align-items: center; padding: 8px; margin-bottom: 5px; 
+                        border-radius: 8px; background: linear-gradient(90deg, #1a1a1a, #2a2a2a); 
+                        border: 1px solid #333; font-size: 14px;
+                    }
+                    .radar-list-img { width: 18px; height: 18px; object-fit: contain; margin-right: 7px; }
+                </style>
+            </head>
+            <body>
+                <div id="lista-externa"></div>
+            </body>
+            </html>
+        `);
+        janelaRadar.document.close(); 
+    }
+    setTimeout(atualizarJanelaExterna, 500);
+}
+
+function atualizarJanelaExterna(){
+    if(janelaRadar && !janelaRadar.closed){
+        const conteudoOriginal = document.getElementById('eventList').innerHTML;
+        const containerExterno = janelaRadar.document.getElementById('lista-externa');
+        if (containerExterno) {
+            containerExterno.innerHTML = conteudoOriginal;
+        }
+    }
 }
 
 function limparTudo(){ db.ref('eventos').remove(); }
