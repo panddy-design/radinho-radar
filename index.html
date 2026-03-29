@@ -30,13 +30,11 @@ body {
 }
 .btn-engrenagem:hover { transform: rotate(45deg); }
 
-/* INPUTS NO TOPO */
 .input-container {
     display: flex;
     justify-content: center;
     gap: 10px;
     margin-bottom: 15px;
-    flex-wrap: wrap;
 }
 
 input {
@@ -54,20 +52,13 @@ input {
     color: #fff;
     cursor: pointer;
     font-weight: bold;
-    transition: opacity 0.2s;
 }
 
-.btn-estilo-padrao:hover {
-    opacity: 0.8;
-}
-
-/* CONTROLES SUPERIORES */
 .controls {
     display: flex;
     justify-content: center;
     gap: 10px;
     margin-bottom: 20px;
-    flex-wrap: wrap;
 }
 
 .control-btn {
@@ -76,7 +67,6 @@ input {
     font-size: 13px;
 }
 
-/* BOTÕES DO RADAR */
 .team-label {
     margin: 10px 0 5px 0;
     font-weight: bold;
@@ -97,23 +87,31 @@ input {
     border-radius: 14px;
     position: relative;
     display: flex;
+    flex-direction: column; /* Organiza texto em cima e ícone embaixo */
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    padding-top: 10px; /* Espaço para o texto não colar na borda */
 }
 
-.btn-icon {
-    font-size: 32px;
+/* IMAGENS NOS BOTÕES - FORÇANDO 35x35px */
+.btn-icon-img {
+    width: 35px !important; 
+    height: 35px !important;
+    min-width: 35px;
+    min-height: 35px;
+    object-fit: contain;
     pointer-events: none;
-    margin-top: 10px;
+    margin-top: 5px; /* Empurra o ícone um pouco para baixo do texto */
 }
 
+/* TEXTO DOS BOTÕES - CENTRALIZADO NO TOPO */
 .btn-text {
     position: absolute;
-    top: 5px;
-    left: 0;
+    top: 6px;
     width: 100%;
-    text-align: center;
+    left: 0;
+    text-align: center; /* Centraliza o texto horizontalmente */
     font-size: 9px;
     text-transform: uppercase;
     color: #bbb;
@@ -121,10 +119,11 @@ input {
     letter-spacing: 0.5px;
 }
 
+/* REMOVIDO A INVERSÃO ANTERIOR PARA MANTER TUDO CENTRALIZADO IGUAL */
+
 .radar-button.editando {
     border: 2px dashed #007bff !important;
     opacity: 0.8;
-    cursor: grab;
 }
 
 .event-list {
@@ -141,13 +140,20 @@ input {
     background: linear-gradient(90deg, #1a1a1a, #2a2a2a);
     border: 1px solid #333;
 }
+
+.radar-list-img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    margin-right: 10px;
+}
 </style>
 </head>
 
 <body>
 
 <div class="config-container">
-    <button class="btn-engrenagem" onclick="toggleEdicao()" title="Mudar botões de lugar">⚙️</button>
+    <button class="btn-engrenagem" onclick="toggleEdicao()">⚙️</button>
 </div>
 
 <div class="input-container">
@@ -164,38 +170,38 @@ input {
 
 <div class="team-label">Casa</div>
 <div class="radar-container" id="container-casa">
-    <button class="radar-button btn-estilo-padrao" onclick="add('Meta','A')"><span class="btn-text">Meta</span><span class="btn-icon">🎯</span></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Offside','A')"><span class="btn-text">Offside</span><span class="btn-icon">🚩</span></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Lateral','A')"><span class="btn-text">Lateral</span><span class="btn-icon">↔️</span></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Canto','A')"><span class="btn-text">Canto</span><span class="btn-icon">📐</span></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Meta','A')"><span class="btn-text">Meta</span><img src="meta.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Offside','A')"><span class="btn-text">Offside</span><img src="offside.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Lateral','A')"><span class="btn-text">Lateral</span><img src="lateral.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Canto','A')"><span class="btn-text">Canto</span><img src="canto.png" class="btn-icon-img"></button>
     
-    <button class="radar-button btn-estilo-padrao" onclick="add('Goleiro','A')"><span class="btn-text">Goleiro</span><span class="btn-icon">🧤</span></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Defesa','A')"><span class="btn-text">Defesa</span><span class="btn-icon">🛡️</span></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Ataque','A')"><span class="btn-text">Ataque</span><span class="btn-icon">⚡</span></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Perigoso','A')"><span class="btn-text">Perigoso</span><span class="btn-icon">🔥</span></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Goleiro','A')"><span class="btn-text">Goleiro</span><img src="goleiro.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Defesa','A')"><span class="btn-text">Defesa</span><img src="defesa-casa.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Ataque','A')"><span class="btn-text">Ataque</span><img src="ataque-casa.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Perigoso','A')"><span class="btn-text">Perigoso</span><img src="perigoso-casa.png" class="btn-icon-img"></button>
     
-    <button class="radar-button btn-estilo-padrao" onclick="add('Parado','A')"><span class="btn-text">Parado</span><span class="btn-icon">⛔</span></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Substituição','A')"><span class="btn-text">Sub</span><span class="btn-icon">🔄</span></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Falta','A')"><span class="btn-text">Falta</span><span class="btn-icon">🚫</span></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Gol!','A')"><span class="btn-text">Gol!</span><span class="btn-icon">⚽</span></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Parado','A')"><span class="btn-text">Parado</span><img src="parado.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Substituição','A')"><span class="btn-text">Sub</span><img src="sub.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Falta','A')"><span class="btn-text">Falta</span><img src="falta.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Gol!','A')"><span class="btn-text">Gol!</span><img src="bola.png" class="btn-icon-img"></button>
 </div>
 
 <div class="team-label">Fora</div>
 <div class="radar-container" id="container-fora">
-    <button class="radar-button btn-estilo-padrao" onclick="add('Meta','B')"><span class="btn-text">Meta</span><span class="btn-icon">🎯</span></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Offside','B')"><span class="btn-text">Offside</span><span class="btn-icon">🚩</span></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Lateral','B')"><span class="btn-text">Lateral</span><span class="btn-icon">↔️</span></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Canto','B')"><span class="btn-text">Canto</span><span class="btn-icon">📐</span></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Meta','B')"><span class="btn-text">Meta</span><img src="meta.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Offside','B')"><span class="btn-text">Offside</span><img src="offside.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Lateral','B')"><span class="btn-text">Lateral</span><img src="lateral.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Canto','B')"><span class="btn-text">Canto</span><img src="canto.png" class="btn-icon-img"></button>
     
-    <button class="radar-button btn-estilo-padrao" onclick="add('Goleiro','B')"><span class="btn-text">Goleiro</span><span class="btn-icon">🧤</span></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Defesa','B')"><span class="btn-text">Defesa</span><span class="btn-icon">🛡️</span></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Ataque','B')"><span class="btn-text">Ataque</span><span class="btn-icon">⚡</span></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Perigoso','B')"><span class="btn-text">Perigoso</span><span class="btn-icon">🔥</span></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Goleiro','B')"><span class="btn-text">Goleiro</span><img src="goleiro.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Defesa','B')"><span class="btn-text">Defesa</span><img src="defesa-fora.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Ataque','B')"><span class="btn-text">Ataque</span><img src="ataque-fora.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Perigoso','B')"><span class="btn-text">Perigoso</span><img src="perigoso-fora.png" class="btn-icon-img"></button>
     
-    <button class="radar-button btn-estilo-padrao" onclick="add('Parado','B')"><span class="btn-text">Parado</span><span class="btn-icon">⛔</span></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Substituição','B')"><span class="btn-text">Sub</span><span class="btn-icon">🔄</span></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Falta','B')"><span class="btn-text">Falta</span><span class="btn-icon">🚫</span></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Gol!','B')"><span class="btn-text">Gol!</span><span class="btn-icon">⚽</span></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Parado','B')"><span class="btn-text">Parado</span><img src="parado.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Substituição','B')"><span class="btn-text">Sub</span><img src="sub.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Falta','B')"><span class="btn-text">Falta</span><img src="falta.png" class="btn-icon-img"></button>
+    <button class="radar-button btn-estilo-padrao" onclick="add('Gol!','B')"><span class="btn-text">Gol!</span><img src="bola.png" class="btn-icon-img"></button>
 </div>
 
 <div id="eventList" class="event-list"></div>
@@ -204,82 +210,38 @@ input {
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-// --- FUNÇÃO DE MUDAR POSIÇÃO ---
+const iconesBase = {
+    Meta:'meta.png', Offside:'offside.png', Lateral:'lateral.png', Canto:'canto.png',
+    Goleiro:'goleiro.png', Parado:'parado.png', Substituição:'sub.png', Falta:'falta.png', 
+    'Gol!':'bola.png', Tempo:'⏱️'
+};
+
 let editMode = false;
 let draggedItem = null;
 
 function toggleEdicao() {
     editMode = !editMode;
-    const buttons = document.querySelectorAll('.radar-button');
-    buttons.forEach(btn => {
-        if (editMode) {
-            btn.classList.add('editando');
-            btn.setAttribute('draggable', 'true');
-        } else {
-            btn.classList.remove('editando');
-            btn.setAttribute('draggable', 'false');
-        }
+    document.querySelectorAll('.radar-button').forEach(btn => {
+        btn.classList.toggle('editando', editMode);
+        btn.setAttribute('draggable', editMode);
     });
 }
 
 document.querySelectorAll('.radar-container').forEach(container => {
-    container.addEventListener('dragstart', e => {
-        if (!editMode) return;
-        draggedItem = e.currentTarget === e.target ? e.target : e.target.closest('.radar-button');
-        if(!draggedItem) return;
-        setTimeout(() => draggedItem.style.opacity = '0.5', 0);
-    });
-
-    container.addEventListener('dragend', e => {
-        if (!editMode || !draggedItem) return;
-        draggedItem.style.opacity = '1';
-    });
-
-    container.addEventListener('dragover', e => {
-        if (!editMode) return;
-        e.preventDefault();
-        const afterElement = getDragAfterElement(container, e.clientX, e.clientY);
-        if (afterElement == null) {
-            container.appendChild(draggedItem);
-        } else {
-            container.insertBefore(draggedItem, afterElement);
+    container.addEventListener('dragstart', e => { if(editMode) draggedItem = e.target.closest('.radar-button'); });
+    container.addEventListener('dragover', e => { if(editMode) e.preventDefault(); });
+    container.addEventListener('drop', e => {
+        if(!editMode) return;
+        const target = e.target.closest('.radar-button');
+        if(target && target !== draggedItem) {
+            const children = [...container.children];
+            const fromIdx = children.indexOf(draggedItem);
+            const toIdx = children.indexOf(target);
+            if(fromIdx < toIdx) container.insertBefore(draggedItem, target.nextSibling);
+            else container.insertBefore(draggedItem, target);
         }
     });
 });
-
-function getDragAfterElement(container, x, y) {
-    const draggableElements = [...container.querySelectorAll('.radar-button:not(.dragging)')];
-    return draggableElements.reduce((closest, child) => {
-        const box = child.getBoundingClientRect();
-        const offsetX = x - box.left - box.width / 2;
-        const offsetY = y - box.top - box.height / 2;
-        if (Math.abs(offsetX) < 50 && Math.abs(offsetY) < 50) {
-            return child;
-        } else {
-            return closest;
-        }
-    }, null);
-}
-
-// --- LÓGICA ORIGINAL FIREBASE ---
-
-const cores = {
-    Meta:'#27ae60', Goleiro:'#3498db', Defesa:'#2ecc71',
-    Ataque:'#f1c40f', Perigoso:'#e74c3c',
-    Lateral:'#f1c40f', Falta:'#f39c12',
-    'Gol!':'#2ecc71', Offside:'#9b59b6',
-    Canto:'#16a085', Parado:'#e74c3c',
-    'Substituição':'#95a5a6', Tempo:'#8e44ad'
-};
-
-const icones = {
-    Meta:'🎯', Goleiro:'🧤', Defesa:'🛡️',
-    Ataque:'⚡', Perigoso:'🔥',
-    Lateral:'↔️', Falta:'🚫',
-    'Gol!':'⚽', Offside:'🚩',
-    Canto:'📐', Parado:'⛔',
-    'Substituição':'🔄', Tempo:'⏱️'
-};
 
 const firebaseConfig = {
   apiKey: "AIzaSyCz6YUc4GHbAHu5neKFUXOy2geO8gICUXo",
@@ -287,128 +249,62 @@ const firebaseConfig = {
   databaseURL: "https://radin-radar-default-rtdb.firebaseio.com",
   projectId: "radin-radar"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let janela = null;
-
-function addTempo(){
-    db.ref('eventos').push({
-        evento:'Tempo',
-        team:'',
-        timestamp: Date.now()
-    });
-}
-
 function add(evento, time){
     if(editMode) return;
-
-    const teamA = document.getElementById('teamA').value || "Casa";
-    const teamB = document.getElementById('teamB').value || "Fora";
-    const team = time === 'A' ? teamA : teamB;
-
+    const tA = document.getElementById('teamA').value || "Casa";
+    const tB = document.getElementById('teamB').value || "Fora";
+    const team = time === 'A' ? tA : tB;
     const ref = db.ref('eventos');
-
+    
     if(evento !== 'Parado'){
         ref.orderByChild('team').equalTo(team).once('value', snap => {
-            let ultimoParadoKey = null;
-            let ultimoTempo = 0;
-
-            snap.forEach(child => {
-                const val = child.val();
-                if(val.evento === 'Parado' && val.timestamp > ultimoTempo){
-                    ultimoTempo = val.timestamp;
-                    ultimoParadoKey = child.key;
-                }
-            });
-
-            if(ultimoParadoKey){
-                ref.child(ultimoParadoKey).remove();
-            }
-
-            enviar();
+            snap.forEach(c => { if(c.val().evento === 'Parado') c.ref.remove(); });
+            ref.push({ evento, team, teamType: time, timestamp: Date.now() });
         });
-    } else {
-        enviar();
-    }
-
-    function enviar(){
-        ref.push({
-            evento,
-            team,
-            timestamp: Date.now()
-        });
+    } else { 
+        ref.push({ evento, team, teamType: time, timestamp: Date.now() }); 
     }
 }
 
+function addTempo() { db.ref('eventos').push({ evento:'Tempo', team:'', timestamp: Date.now() }); }
+
 db.ref('eventos').on('value', snap => {
-    const data = snap.val();
     const list = document.getElementById('eventList');
     list.innerHTML = '';
+    const data = snap.val();
+    const teamA_Name = document.getElementById('teamA').value || "Casa";
 
     for (let k in data){
         const e = data[k];
-
-        const texto = e.evento === 'Tempo'
-            ? 'Tempo'
-            : `${e.evento} ${e.team}`;
-
         const div = document.createElement('div');
         div.className = 'event-card';
+        let img = iconesBase[e.evento];
+        
+        if(['Defesa', 'Ataque', 'Perigoso'].includes(e.evento)){
+            const sufixo = (e.team === teamA_Name || e.teamType === 'A') ? '-casa.png' : '-fora.png';
+            img = e.evento.toLowerCase() + sufixo;
+        }
 
-        div.innerHTML = `
-            <div style="width:25px;text-align:center;margin-right:8px;color:${cores[e.evento]};font-size:16px;">
-                ${icones[e.evento] || '•'}
-            </div>
-            ${texto}
-        `;
-
+        const iconHTML = (img && img.includes('.png')) 
+            ? `<img src="${img}" class="radar-list-img">` 
+            : `<span>${img || '•'}</span>`;
+            
+        div.innerHTML = `${iconHTML} ${e.evento === 'Tempo' ? 'Tempo' : e.evento + ' ' + e.team}`;
         list.prepend(div);
     }
-
-    atualizarJanela();
 });
 
+let janela = null;
 function abrirJanela(){
-    if(!janela || janela.closed){
-        janela = window.open("", "Radar", "width=320,height=500");
-
-        janela.document.write(`
-            <html>
-            <head>
-            <style>
-                body{background:#111;color:#fff;font-family:Arial;padding:10px;}
-                .event-card{display:flex;align-items:center;padding:8px;margin-bottom:8px;border-radius:8px;background:linear-gradient(90deg,#1a1a1a,#2a2a2a);}
-            </style>
-            </head>
-            <body>
-                <div id="lista"></div>
-            </body>
-            </html>
-        `);
-    }
-    atualizarJanela();
+    janela = window.open("", "Radar", "width=320,height=500");
+    janela.document.write('<html><head><style>body{background:#111;color:#fff;font-family:Arial;padding:10px;}.event-card{display:flex;align-items:center;padding:8px;margin-bottom:8px;border-radius:8px;background:linear-gradient(90deg,#1a1a1a,#2a2a2a);}.radar-list-img{width:20px;height:20px;margin-right:10px;}</style></head><body><div id="lista"></div></body></html>');
 }
 
-function atualizarJanela(){
-    if(janela && !janela.closed){
-        const lista = janela.document.getElementById('lista');
-        lista.innerHTML = document.getElementById('eventList').innerHTML;
-    }
-}
-
-function limparTudo(){
-    db.ref('eventos').remove();
-}
-
-function desfazerUltimo(){
-    db.ref('eventos').orderByChild('timestamp').limitToLast(1).once('value', snap=>{
-        snap.forEach(child=>{
-            child.ref.remove();
-        });
-    });
-}
+function limparTudo(){ db.ref('eventos').remove(); }
+function desfazerUltimo(){ db.ref('eventos').orderByChild('timestamp').limitToLast(1).once('value', s => s.forEach(c => c.ref.remove())); }
 </script>
 
 </body>
