@@ -15,7 +15,6 @@ body {
     text-align: center;
 }
 
-/* CONFIGURAÇÃO / ENGRENAGEM */
 .config-container {
     display: flex;
     justify-content: flex-end;
@@ -26,11 +25,8 @@ body {
     border: none;
     font-size: 24px;
     cursor: pointer;
-    transition: transform 0.3s;
 }
-.btn-engrenagem:hover { transform: rotate(45deg); }
 
-/* INPUTS DE TIME - CENTRALIZADOS E PEQUENOS */
 .input-container {
     display: flex;
     justify-content: center;
@@ -47,7 +43,6 @@ input {
     text-align: center;
 }
 
-/* BOTÕES DE CONTROLE */
 .controls {
     display: flex;
     justify-content: center;
@@ -65,7 +60,6 @@ input {
     font-weight: bold;
 }
 
-/* ABAS ESTILO SEGMENTED CONTROL */
 .tabs-container {
     display: flex;
     background-color: #222;
@@ -84,16 +78,13 @@ input {
     cursor: pointer;
     font-weight: bold;
     font-size: 14px;
-    transition: 0.2s;
     border-radius: 10px;
 }
 .tab-button.active {
     background-color: #007bff;
     color: #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 
-/* SEÇÕES DE RADAR */
 .radar-section { display: none; }
 .radar-section.active { display: block; }
 
@@ -124,21 +115,16 @@ input {
     height: 35px !important;
     object-fit: contain;
     pointer-events: none;
-    margin-top: 5px;
 }
 .btn-text {
     position: absolute;
     top: 6px;
     width: 100%;
-    left: 0;
-    text-align: center;
     font-size: 9px;
     text-transform: uppercase;
     color: #bbb;
-    pointer-events: none;
 }
 
-/* LISTA DE EVENTOS PRINCIPAL */
 .event-list { max-width: 400px; margin: 20px auto; }
 .event-card {
     display: flex;
@@ -156,7 +142,7 @@ input {
 <body>
 
 <div class="config-container">
-    <button class="btn-engrenagem" onclick="toggleEdicao()">⚙️</button>
+    <button class="btn-engrenagem">⚙️</button>
 </div>
 
 <div class="input-container">
@@ -187,9 +173,10 @@ input {
         <button class="radar-button" onclick="add('Ataque','A')"><span class="btn-text">Ataque</span><img src="ataque-casa.png" class="btn-icon-img"></button>
         <button class="radar-button" onclick="add('Perigoso','A')"><span class="btn-text">Perigoso</span><img src="perigoso-casa.png" class="btn-icon-img"></button>
         <button class="radar-button" onclick="add('Parado','A')"><span class="btn-text">Parado</span><img src="parado.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Substituição','A')"><span class="btn-text">Sub</span><img src="sub.png" class="btn-icon-img"></button>
         <button class="radar-button" onclick="add('Falta','A')"><span class="btn-text">Falta</span><img src="falta.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Penalti','A')"><span class="btn-text">Penalti</span><img src="penal.png" class="btn-icon-img"></button>
         <button class="radar-button" onclick="add('Gol!','A')"><span class="btn-text">Gol!</span><img src="bola.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Substituição','A')"><span class="btn-text">Sub</span><img src="sub.png" class="btn-icon-img"></button>
     </div>
 </div>
 
@@ -204,9 +191,10 @@ input {
         <button class="radar-button" onclick="add('Ataque','B')"><span class="btn-text">Ataque</span><img src="ataque-fora.png" class="btn-icon-img"></button>
         <button class="radar-button" onclick="add('Perigoso','B')"><span class="btn-text">Perigoso</span><img src="perigoso-fora.png" class="btn-icon-img"></button>
         <button class="radar-button" onclick="add('Parado','B')"><span class="btn-text">Parado</span><img src="parado.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Substituição','B')"><span class="btn-text">Sub</span><img src="sub.png" class="btn-icon-img"></button>
         <button class="radar-button" onclick="add('Falta','B')"><span class="btn-text">Falta</span><img src="falta.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Penalti','B')"><span class="btn-text">Penalti</span><img src="penal.png" class="btn-icon-img"></button>
         <button class="radar-button" onclick="add('Gol!','B')"><span class="btn-text">Gol!</span><img src="bola.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Substituição','B')"><span class="btn-text">Sub</span><img src="sub.png" class="btn-icon-img"></button>
     </div>
 </div>
 
@@ -225,7 +213,11 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const iconesBase = { Meta:'meta.png', Offside:'offside.png', Lateral:'lateral.png', Canto:'canto.png', Goleiro:'goleiro.png', Parado:'parado.png', Substituição:'sub.png', Falta:'falta.png', 'Gol!':'bola.png', Tempo:'⏱️' };
+const iconesBase = { 
+    Meta:'meta.png', Offside:'offside.png', Lateral:'lateral.png', Canto:'canto.png', 
+    Goleiro:'goleiro.png', Parado:'parado.png', Substituição:'sub.png', Falta:'falta.png', 
+    Penalti:'penal.png', 'Gol!':'bola.png', Tempo:'⏱️' 
+};
 let janelaRadar = null;
 
 function mudarAba(aba) {
@@ -244,7 +236,23 @@ function add(evento, time){
     const tA = document.getElementById('teamA').value || "Casa";
     const tB = document.getElementById('teamB').value || "Fora";
     const team = time === 'A' ? tA : tB;
-    db.ref('eventos').push({ evento, team, teamType: time, timestamp: Date.now() });
+    const ref = db.ref('eventos');
+    
+    // Lógica para substituir o "Parado" por qualquer novo lance
+    if(evento !== 'Parado'){
+        ref.orderByChild('teamType').equalTo(time).once('value', snap => {
+            snap.forEach(c => { 
+                if(c.val().evento === 'Parado') c.ref.remove(); 
+            });
+            ref.push({ evento, team, teamType: time, timestamp: Date.now() });
+        });
+    } else {
+        ref.push({ evento, team, teamType: time, timestamp: Date.now() });
+    }
+}
+
+function addTempo() { 
+    db.ref('eventos').push({ evento: 'Tempo', team: '', teamType: '', timestamp: Date.now() }); 
 }
 
 db.ref('eventos').on('value', snap => {
@@ -257,9 +265,11 @@ db.ref('eventos').on('value', snap => {
             const div = document.createElement('div');
             div.className = 'event-card';
             let img = iconesBase[e.evento];
-            if(['Defesa', 'Ataque', 'Perigoso'].includes(e.evento)) img = e.evento.toLowerCase() + (e.teamType === 'A' ? '-casa.png' : '-fora.png');
-            const iconHTML = (img && img.includes('.png')) ? `<img src="${img}" class="radar-list-img">` : `<span>${img || '•'}</span>`;
-            div.innerHTML = `${iconHTML} ${e.evento} ${e.team}`;
+            if(['Defesa', 'Ataque', 'Perigoso'].includes(e.evento)) {
+                img = e.evento.toLowerCase() + (e.teamType === 'A' ? '-casa.png' : '-fora.png');
+            }
+            const iconHTML = (img && img.includes('.png')) ? `<img src="${img}" class="radar-list-img">` : `<span>${img || '⏱️'}</span>`;
+            div.innerHTML = `${iconHTML} ${e.evento === 'Tempo' ? 'Tempo' : e.evento + ' ' + e.team}`;
             list.prepend(div);
         }
     }
@@ -273,18 +283,12 @@ function abrirJanela(){
             <html>
             <head>
                 <style>
-                    /* HIDE SCROLLBAR BUT KEEP SCROLLING */
                     html, body { 
                         background: #111; color: #fff; font-family: Arial; 
                         padding: 10px; margin: 0; 
-                        overflow-y: scroll; 
-                        scrollbar-width: none; /* Firefox */
-                        -ms-overflow-style: none; /* IE/Edge */
+                        overflow-y: scroll; scrollbar-width: none; 
                     }
-                    body::-webkit-scrollbar { 
-                        display: none; 
-                        width: 0 !important;
-                    }
+                    body::-webkit-scrollbar { display: none; }
                     .event-card { 
                         display: flex; align-items: center; padding: 8px; margin-bottom: 5px; 
                         border-radius: 8px; background: #1a1a1a; border: 1px solid #333; font-size: 14px;
