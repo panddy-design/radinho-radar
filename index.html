@@ -2,12 +2,12 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Radinho Radar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Radinho Radar Pro</title>
 
 <style>
 body {
-    font-family: Arial;
+    font-family: Arial, sans-serif;
     background-color: #111;
     color: #fff;
     margin: 0;
@@ -15,7 +15,7 @@ body {
     text-align: center;
 }
 
-/* ESTILO DA ENGRENAGEM */
+/* CONFIGURAÇÃO / ENGRENAGEM */
 .config-container {
     display: flex;
     justify-content: flex-end;
@@ -30,23 +30,34 @@ body {
 }
 .btn-engrenagem:hover { transform: rotate(45deg); }
 
+/* INPUTS DE TIME - TAMANHO RESTAURADO */
 .input-container {
     display: flex;
     justify-content: center;
     gap: 10px;
     margin-bottom: 15px;
 }
-
 input {
-    padding: 8px;
+    padding: 8px; /* Voltando para 8px como solicitado */
     border-radius: 5px;
     border: 1px solid #444;
     background: #222;
     color: #fff;
+    width: 140px; /* Tamanho fixo para manter centralizado e discreto */
+    text-align: center;
 }
 
-/* ESTILO PADRÃO DE BOTÕES */
-.btn-estilo-padrao {
+/* BOTÕES DE CONTROLE SUPERIORES */
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.control-btn {
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 13px;
     background: linear-gradient(90deg, #1a1a1a, #2a2a2a);
     border: 1px solid #444;
     color: #fff;
@@ -54,23 +65,42 @@ input {
     font-weight: bold;
 }
 
-.controls {
+/* ABAS ESTILO SEGMENTED CONTROL */
+.tabs-container {
     display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
+    background-color: #222;
+    padding: 4px;
+    border-radius: 12px;
+    max-width: 400px;
+    margin: 0 auto 20px auto;
+    border: 1px solid #333;
 }
 
-.control-btn {
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-size: 13px;
-}
-
-.team-label {
-    margin: 10px 0 5px 0;
+.tab-button {
+    flex: 1;
+    padding: 12px;
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
     font-weight: bold;
-    color: #aaa;
+    font-size: 14px;
+    transition: 0.2s;
+    border-radius: 10px;
+}
+
+.tab-button.active {
+    background-color: #007bff;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+/* SEÇÕES DE RADAR */
+.radar-section {
+    display: none;
+}
+.radar-section.active {
+    display: block;
 }
 
 .radar-container {
@@ -90,22 +120,23 @@ input {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    background: linear-gradient(90deg, #1a1a1a, #2a2a2a);
+    border: 1px solid #444;
+    cursor: pointer;
     overflow: hidden;
     padding-top: 10px;
 }
 
-/* IMAGENS NOS BOTÕES - 35x35px */
+/* ÍCONES PNG */
 .btn-icon-img {
     width: 35px !important; 
     height: 35px !important;
-    min-width: 35px;
-    min-height: 35px;
     object-fit: contain;
     pointer-events: none;
     margin-top: 5px;
 }
 
-/* TEXTO DOS BOTÕES - CENTRALIZADO */
+/* TEXTO NOS BOTÕES */
 .btn-text {
     position: absolute;
     top: 6px;
@@ -116,7 +147,6 @@ input {
     text-transform: uppercase;
     color: #bbb;
     pointer-events: none;
-    letter-spacing: 0.5px;
 }
 
 .radar-button.editando {
@@ -124,27 +154,25 @@ input {
     opacity: 0.8;
 }
 
+/* LISTA DE EVENTOS */
 .event-list {
     max-width: 400px;
     margin: 20px auto;
 }
-
 .event-card {
     display: flex;
     align-items: center;
     padding: 8px;
     margin-bottom: 8px;
     border-radius: 8px;
-    background: linear-gradient(90deg, #1a1a1a, #2a2a2a);
+    background: #1a1a1a;
     border: 1px solid #333;
     text-align: left;
 }
-
 .radar-list-img {
     width: 20px;
     height: 20px;
-    object-fit: contain;
-    margin-right: 5px;
+    margin-right: 8px;
 }
 </style>
 </head>
@@ -156,51 +184,54 @@ input {
 </div>
 
 <div class="input-container">
-    <input id="teamA" placeholder="Casa">
-    <input id="teamB" placeholder="Fora">
+    <input id="teamA" placeholder="Casa" value="Casa">
+    <input id="teamB" placeholder="Fora" value="Fora">
 </div>
 
 <div class="controls">
-    <button class="control-btn btn-estilo-padrao" onclick="limparTudo()">Limpar</button>
-    <button class="control-btn btn-estilo-padrao" onclick="desfazerUltimo()">Desfazer</button>
-    <button class="control-btn btn-estilo-padrao" onclick="abrirJanela()">Radar</button>
-    <button class="control-btn btn-estilo-padrao" onclick="addTempo()">Tempo</button>
+    <button class="control-btn" onclick="limparTudo()">Limpar</button>
+    <button class="control-btn" onclick="desfazerUltimo()">Desfazer</button>
+    <button class="control-btn" onclick="abrirJanela()">Radar</button>
+    <button class="control-btn" onclick="addTempo()">Tempo</button>
 </div>
 
-<div class="team-label">Casa</div>
-<div class="radar-container" id="container-casa">
-    <button class="radar-button btn-estilo-padrao" onclick="add('Meta','A')"><span class="btn-text">Meta</span><img src="meta.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Offside','A')"><span class="btn-text">Offside</span><img src="offside.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Lateral','A')"><span class="btn-text">Lateral</span><img src="lateral.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Canto','A')"><span class="btn-text">Canto</span><img src="canto.png" class="btn-icon-img"></button>
-    
-    <button class="radar-button btn-estilo-padrao" onclick="add('Goleiro','A')"><span class="btn-text">Goleiro</span><img src="goleiro.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Defesa','A')"><span class="btn-text">Defesa</span><img src="defesa-casa.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Ataque','A')"><span class="btn-text">Ataque</span><img src="ataque-casa.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Perigoso','A')"><span class="btn-text">Perigoso</span><img src="perigoso-casa.png" class="btn-icon-img"></button>
-    
-    <button class="radar-button btn-estilo-padrao" onclick="add('Parado','A')"><span class="btn-text">Parado</span><img src="parado.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Substituição','A')"><span class="btn-text">Sub</span><img src="sub.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Falta','A')"><span class="btn-text">Falta</span><img src="falta.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao" onclick="add('Gol!','A')"><span class="btn-text">Gol!</span><img src="bola.png" class="btn-icon-img"></button>
+<div class="tabs-container">
+    <button id="btn-tab-casa" class="tab-button active" onclick="mudarAba('casa')">CASA</button>
+    <button id="btn-tab-fora" class="tab-button" onclick="mudarAba('fora')">FORA</button>
 </div>
 
-<div class="team-label">Fora</div>
-<div class="radar-container" id="container-fora">
-    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Meta','B')"><span class="btn-text">Meta</span><img src="meta.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Offside','B')"><span class="btn-text">Offside</span><img src="offside.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Lateral','B')"><span class="btn-text">Lateral</span><img src="lateral.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Canto','B')"><span class="btn-text">Canto</span><img src="canto.png" class="btn-icon-img"></button>
-    
-    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Goleiro','B')"><span class="btn-text">Goleiro</span><img src="goleiro.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Defesa','B')"><span class="btn-text">Defesa</span><img src="defesa-fora.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Ataque','B')"><span class="btn-text">Ataque</span><img src="ataque-fora.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Perigoso','B')"><span class="btn-text">Perigoso</span><img src="perigoso-fora.png" class="btn-icon-img"></button>
-    
-    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Parado','B')"><span class="btn-text">Parado</span><img src="parado.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Substituição','B')"><span class="btn-text">Sub</span><img src="sub.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Falta','B')"><span class="btn-text">Falta</span><img src="falta.png" class="btn-icon-img"></button>
-    <button class="radar-button btn-estilo-padrao fora-btn" onclick="add('Gol!','B')"><span class="btn-text">Gol!</span><img src="bola.png" class="btn-icon-img"></button>
+<div id="section-casa" class="radar-section active">
+    <div class="radar-container" id="container-casa">
+        <button class="radar-button" onclick="add('Meta','A')"><span class="btn-text">Meta</span><img src="meta.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Offside','A')"><span class="btn-text">Offside</span><img src="offside.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Lateral','A')"><span class="btn-text">Lateral</span><img src="lateral.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Canto','A')"><span class="btn-text">Canto</span><img src="canto.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Goleiro','A')"><span class="btn-text">Goleiro</span><img src="goleiro.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Defesa','A')"><span class="btn-text">Defesa</span><img src="defesa-casa.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Ataque','A')"><span class="btn-text">Ataque</span><img src="ataque-casa.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Perigoso','A')"><span class="btn-text">Perigoso</span><img src="perigoso-casa.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Parado','A')"><span class="btn-text">Parado</span><img src="parado.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Substituição','A')"><span class="btn-text">Sub</span><img src="sub.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Falta','A')"><span class="btn-text">Falta</span><img src="falta.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Gol!','A')"><span class="btn-text">Gol!</span><img src="bola.png" class="btn-icon-img"></button>
+    </div>
+</div>
+
+<div id="section-fora" class="radar-section">
+    <div class="radar-container" id="container-fora">
+        <button class="radar-button" onclick="add('Meta','B')"><span class="btn-text">Meta</span><img src="meta.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Offside','B')"><span class="btn-text">Offside</span><img src="offside.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Lateral','B')"><span class="btn-text">Lateral</span><img src="lateral.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Canto','B')"><span class="btn-text">Canto</span><img src="canto.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Goleiro','B')"><span class="btn-text">Goleiro</span><img src="goleiro.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Defesa','B')"><span class="btn-text">Defesa</span><img src="defesa-fora.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Ataque','B')"><span class="btn-text">Ataque</span><img src="ataque-fora.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Perigoso','B')"><span class="btn-text">Perigoso</span><img src="perigoso-fora.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Parado','B')"><span class="btn-text">Parado</span><img src="parado.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Substituição','B')"><span class="btn-text">Sub</span><img src="sub.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Falta','B')"><span class="btn-text">Falta</span><img src="falta.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Gol!','B')"><span class="btn-text">Gol!</span><img src="bola.png" class="btn-icon-img"></button>
+    </div>
 </div>
 
 <div id="eventList" class="event-list"></div>
@@ -216,35 +247,25 @@ const iconesBase = {
 };
 
 let editMode = false;
-let draggedItem = null;
 let janelaRadar = null;
+
+function mudarAba(aba) {
+    document.querySelectorAll('.radar-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+    if(aba === 'casa') {
+        document.getElementById('section-casa').classList.add('active');
+        document.getElementById('btn-tab-casa').classList.add('active');
+    } else {
+        document.getElementById('section-fora').classList.add('active');
+        document.getElementById('btn-tab-fora').classList.add('active');
+    }
+}
 
 function toggleEdicao() {
     editMode = !editMode;
-    document.querySelectorAll('.radar-button').forEach(btn => {
-        btn.classList.toggle('editando', editMode);
-        btn.setAttribute('draggable', editMode);
-    });
+    document.querySelectorAll('.radar-button').forEach(btn => btn.classList.toggle('editando', editMode));
 }
 
-// Drag and Drop
-document.querySelectorAll('.radar-container').forEach(container => {
-    container.addEventListener('dragstart', e => { if(editMode) draggedItem = e.target.closest('.radar-button'); });
-    container.addEventListener('dragover', e => { if(editMode) e.preventDefault(); });
-    container.addEventListener('drop', e => {
-        if(!editMode) return;
-        const target = e.target.closest('.radar-button');
-        if(target && target !== draggedItem) {
-            const children = [...container.children];
-            const fromIdx = children.indexOf(draggedItem);
-            const toIdx = children.indexOf(target);
-            if(fromIdx < toIdx) container.insertBefore(draggedItem, target.nextSibling);
-            else container.insertBefore(draggedItem, target);
-        }
-    });
-});
-
-// Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCz6YUc4GHbAHu5neKFUXOy2geO8gICUXo",
   authDomain: "radin-radar.firebaseapp.com",
@@ -260,86 +281,67 @@ function add(evento, time){
     const tB = document.getElementById('teamB').value || "Fora";
     const team = time === 'A' ? tA : tB;
     const ref = db.ref('eventos');
-    
     if(evento !== 'Parado'){
-        ref.orderByChild('team').equalTo(team).once('value', snap => {
+        ref.orderByChild('teamType').equalTo(time).once('value', snap => {
             snap.forEach(c => { if(c.val().evento === 'Parado') c.ref.remove(); });
             ref.push({ evento, team, teamType: time, timestamp: Date.now() });
         });
-    } else { 
-        ref.push({ evento, team, teamType: time, timestamp: Date.now() }); 
-    }
+    } else { ref.push({ evento, team, teamType: time, timestamp: Date.now() }); }
 }
 
 function addTempo() { db.ref('eventos').push({ evento:'Tempo', team:'', timestamp: Date.now() }); }
 
-// Atualização em Tempo Real
 db.ref('eventos').on('value', snap => {
     const list = document.getElementById('eventList');
     list.innerHTML = '';
     const data = snap.val();
-    const teamA_Name = document.getElementById('teamA').value || "Casa";
-
     if (data) {
         for (let k in data){
             const e = data[k];
             const div = document.createElement('div');
             div.className = 'event-card';
             let img = iconesBase[e.evento];
-            
-            if(['Defesa', 'Ataque', 'Perigoso'].includes(e.evento)){
-                const sufixo = (e.team === teamA_Name || e.teamType === 'A') ? '-casa.png' : '-fora.png';
-                img = e.evento.toLowerCase() + sufixo;
-            }
-
-            const iconHTML = (img && img.includes('.png')) 
-                ? `<img src="${img}" class="radar-list-img">` 
-                : `<span>${img || '•'}</span>`;
-                
+            if(['Defesa', 'Ataque', 'Perigoso'].includes(e.evento)) img = e.evento.toLowerCase() + (e.teamType === 'A' ? '-casa.png' : '-fora.png');
+            const iconHTML = (img && img.includes('.png')) ? `<img src="${img}" class="radar-list-img">` : `<span>${img || '•'}</span>`;
             div.innerHTML = `${iconHTML} ${e.evento === 'Tempo' ? 'Tempo' : e.evento + ' ' + e.team}`;
             list.prepend(div);
         }
     }
-    atualizarJanelaExterna();
+    if(janelaRadar && !janelaRadar.closed) atualizarJanelaExterna();
 });
 
-// MODO JANELA
 function abrirJanela(){
     if(!janelaRadar || janelaRadar.closed){
         janelaRadar = window.open("", "RadarWindow", "width=350,height=600");
-        
         janelaRadar.document.write(`
             <html>
             <head>
-                <title>Radar Externo</title>
                 <style>
-                    body { background: #111; color: #fff; font-family: Arial, sans-serif; padding: 15px; margin: 0; }
+                    body { 
+                        background: #111; color: #fff; font-family: Arial; padding: 15px; margin: 0; 
+                        overflow-y: scroll; /* Permite rolar */
+                    }
+                    /* ESCONDE A BARRA DE ROLAGEM (ROLEVER) */
+                    body::-webkit-scrollbar { display: none; }
+                    body { -ms-overflow-style: none; scrollbar-width: none; }
+
                     .event-card { 
                         display: flex; align-items: center; padding: 8px; margin-bottom: 5px; 
-                        border-radius: 8px; background: linear-gradient(90deg, #1a1a1a, #2a2a2a); 
-                        border: 1px solid #333; font-size: 14px;
+                        border-radius: 8px; background: #1a1a1a; border: 1px solid #333; font-size: 14px;
                     }
-                    .radar-list-img { width: 18px; height: 18px; object-fit: contain; margin-right: 7px; }
+                    .radar-list-img { width: 18px; height: 18px; margin-right: 7px; }
                 </style>
             </head>
-            <body>
-                <div id="lista-externa"></div>
-            </body>
+            <body><div id="lista-externa"></div></body>
             </html>
         `);
-        janelaRadar.document.close(); 
+        janelaRadar.document.close();
     }
     setTimeout(atualizarJanelaExterna, 500);
 }
 
 function atualizarJanelaExterna(){
-    if(janelaRadar && !janelaRadar.closed){
-        const conteudoOriginal = document.getElementById('eventList').innerHTML;
-        const containerExterno = janelaRadar.document.getElementById('lista-externa');
-        if (containerExterno) {
-            containerExterno.innerHTML = conteudoOriginal;
-        }
-    }
+    if(janelaRadar && !janelaRadar.closed) janelaRadar.document.getElementById('lista-externa').innerHTML = document.getElementById('eventList').innerHTML;
 }
 
 function limparTudo(){ db.ref('eventos').remove(); }
