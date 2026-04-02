@@ -6,164 +6,169 @@
 <title>Radinho Radar Pro</title>
 
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background-color: #111;
-    color: #fff;
-    margin: 0;
-    padding: 10px;
-    text-align: center;
-}
+    * { box-sizing: border-box; }
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #111;
+        color: #fff;
+        margin: 0;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-.config-container {
-    display: flex;
-    justify-content: flex-end;
-    padding: 5px;
-}
-.btn-engrenagem {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-}
+    .app-container {
+        width: 100%;
+        max-width: 380px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
 
-.input-container {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-input {
-    padding: 8px;
-    border-radius: 5px;
-    border: 1px solid #444;
-    background: #222;
-    color: #fff;
-    width: 140px;
-    text-align: center;
-}
+    .config-container {
+        display: flex;
+        justify-content: flex-end;
+        width: 100%;
+    }
 
-.controls {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-.control-btn {
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-size: 13px;
-    background: linear-gradient(90deg, #1a1a1a, #2a2a2a);
-    border: 1px solid #444;
-    color: #fff;
-    cursor: pointer;
-    font-weight: bold;
-}
+    /* INPUTS */
+    .input-container {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        gap: 10px;
+    }
+    input {
+        flex: 1;
+        padding: 8px;
+        border-radius: 5px;
+        border: 1px solid #444;
+        background: #222;
+        color: #fff;
+        text-align: center;
+    }
 
-.tabs-container {
-    display: flex;
-    background-color: #222;
-    padding: 4px;
-    border-radius: 12px;
-    max-width: 400px;
-    margin: 0 auto 20px auto;
-    border: 1px solid #333;
-}
-.tab-button {
-    flex: 1;
-    padding: 12px;
-    background: none;
-    border: none;
-    color: #888;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 14px;
-    border-radius: 10px;
-}
-.tab-button.active {
-    background-color: #007bff;
-    color: #fff;
-}
+    /* CONTROLES SUPERIORES */
+    .controls {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 5px;
+        width: 100%;
+    }
+    .control-btn {
+        padding: 8px 5px;
+        border-radius: 15px;
+        font-size: 11px;
+        background: linear-gradient(90deg, #1a1a1a, #2a2a2a);
+        border: 1px solid #444;
+        color: #fff;
+        cursor: pointer;
+        font-weight: bold;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
 
-.radar-section { display: none; }
-.radar-section.active { display: block; }
+    .control-icon-img {
+        width: 22px;
+        height: 22px;
+        object-fit: contain;
+        margin-bottom: 3px;
+    }
 
-.radar-container {
-    display: grid;
-    grid-template-columns: repeat(4, 80px);
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-.radar-button {
-    width: 80px;
-    height: 80px;
-    border-radius: 14px;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(90deg, #1a1a1a, #2a2a2a);
-    border: 1px solid #444;
-    cursor: pointer;
-    overflow: hidden;
-    padding-top: 10px;
-}
-.btn-icon-img {
-    width: 35px !important; 
-    height: 35px !important;
-    object-fit: contain;
-    pointer-events: none;
-}
-.btn-text {
-    position: absolute;
-    top: 6px;
-    width: 100%;
-    font-size: 9px;
-    text-transform: uppercase;
-    color: #bbb;
-}
+    .team-label {
+        background-color: #007bff;
+        color: #fff;
+        padding: 8px;
+        text-align: center;
+        font-weight: bold;
+        width: 100%;
+        border-radius: 5px;
+        text-transform: uppercase;
+    }
 
-.event-list { max-width: 400px; margin: 20px auto; }
-.event-card {
-    display: flex;
-    align-items: center;
-    padding: 8px;
-    margin-bottom: 8px;
-    border-radius: 8px;
-    background: #1a1a1a;
-    border: 1px solid #333;
-    text-align: left;
-}
-.radar-list-img { width: 20px; height: 20px; margin-right: 8px; }
+    /* GRADE RADAR */
+    .radar-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        width: 100%;
+    }
+
+    .radar-button {
+        aspect-ratio: 1 / 1;
+        border-radius: 14px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #1a1a1a;
+        border: 1px solid #444;
+        cursor: pointer;
+        padding-top: 12px;
+    }
+
+    .radar-button.editando {
+        border: 2px dashed #007bff !important;
+        opacity: 0.7;
+    }
+
+    .btn-icon-img {
+        width: 35px !important;
+        height: 35px !important;
+        object-fit: contain;
+        pointer-events: none;
+    }
+
+    .btn-text {
+        position: absolute;
+        top: 6px;
+        width: 100%;
+        font-size: 9px;
+        text-transform: uppercase;
+        color: #bbb;
+        pointer-events: none;
+    }
+
+    .event-list { width: 100%; margin-top: 10px; }
+    .event-card {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        margin-bottom: 8px;
+        border-radius: 8px;
+        background: #1a1a1a;
+        border: 1px solid #333;
+    }
+    .radar-list-img { width: 20px; height: 20px; margin-right: 10px; }
 </style>
 </head>
 <body>
 
-<div class="config-container">
-    <button class="btn-engrenagem">⚙️</button>
-</div>
+<div class="app-container">
+    
+    <div class="config-container">
+        <button onclick="toggleEdicao()" style="background:none; border:none; font-size:24px; cursor:pointer; color:#fff;">⚙️</button>
+    </div>
 
-<div class="input-container">
-    <input id="teamA" placeholder="Casa" value="Casa">
-    <input id="teamB" placeholder="Fora" value="Fora">
-</div>
+    <div class="input-container">
+        <input id="teamA" placeholder="Casa" value="Casa">
+        <input id="teamB" placeholder="Fora" value="Fora">
+    </div>
 
-<div class="controls">
-    <button class="control-btn" onclick="limparTudo()">Limpar</button>
-    <button class="control-btn" onclick="desfazerUltimo()">Desfazer</button>
-    <button class="control-btn" onclick="abrirJanela()">Radar</button>
-    <button class="control-btn" onclick="addTempo()">Tempo</button>
-</div>
+    <div class="controls">
+        <button class="control-btn" onclick="limparTudo()"><img src="limpar.png" class="control-icon-img">Limpar</button>
+        <button class="control-btn" onclick="desfazerUltimo()"><img src="desfazer.png" class="control-icon-img">Desfazer</button>
+        <button class="control-btn" onclick="abrirJanela()"><img src="radar.png" class="control-icon-img">Radar</button>
+        <button class="control-btn" onclick="addTempo()"><img src="tempo.png" class="control-icon-img">Tempo</button>
+        <button class="control-btn" onclick="addSub()"><img src="sub.png" class="control-icon-img">Sub</button>
+    </div>
 
-<div class="tabs-container">
-    <button id="btn-tab-casa" class="tab-button active" onclick="mudarAba('casa')">CASA</button>
-    <button id="btn-tab-fora" class="tab-button" onclick="mudarAba('fora')">FORA</button>
-</div>
-
-<div id="section-casa" class="radar-section active">
-    <div class="radar-container">
+    <div class="team-label">CASA</div>
+    <div class="radar-container" id="container-casa">
         <button class="radar-button" onclick="add('Meta','A')"><span class="btn-text">Meta</span><img src="meta.png" class="btn-icon-img"></button>
         <button class="radar-button" onclick="add('Offside','A')"><span class="btn-text">Offside</span><img src="offside.png" class="btn-icon-img"></button>
         <button class="radar-button" onclick="add('Lateral','A')"><span class="btn-text">Lateral</span><img src="lateral.png" class="btn-icon-img"></button>
@@ -176,12 +181,10 @@ input {
         <button class="radar-button" onclick="add('Falta','A')"><span class="btn-text">Falta</span><img src="falta.png" class="btn-icon-img"></button>
         <button class="radar-button" onclick="add('Penalti','A')"><span class="btn-text">Penalti</span><img src="penal.png" class="btn-icon-img"></button>
         <button class="radar-button" onclick="add('Gol!','A')"><span class="btn-text">Gol!</span><img src="bola.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Substituição','A')"><span class="btn-text">Sub</span><img src="sub.png" class="btn-icon-img"></button>
     </div>
-</div>
 
-<div id="section-fora" class="radar-section">
-    <div class="radar-container">
+    <div class="team-label">FORA</div>
+    <div class="radar-container" id="container-fora">
         <button class="radar-button" onclick="add('Meta','B')"><span class="btn-text">Meta</span><img src="meta.png" class="btn-icon-img"></button>
         <button class="radar-button" onclick="add('Offside','B')"><span class="btn-text">Offside</span><img src="offside.png" class="btn-icon-img"></button>
         <button class="radar-button" onclick="add('Lateral','B')"><span class="btn-text">Lateral</span><img src="lateral.png" class="btn-icon-img"></button>
@@ -194,66 +197,69 @@ input {
         <button class="radar-button" onclick="add('Falta','B')"><span class="btn-text">Falta</span><img src="falta.png" class="btn-icon-img"></button>
         <button class="radar-button" onclick="add('Penalti','B')"><span class="btn-text">Penalti</span><img src="penal.png" class="btn-icon-img"></button>
         <button class="radar-button" onclick="add('Gol!','B')"><span class="btn-text">Gol!</span><img src="bola.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Substituição','B')"><span class="btn-text">Sub</span><img src="sub.png" class="btn-icon-img"></button>
     </div>
-</div>
 
-<div id="eventList" class="event-list"></div>
+    <div id="eventList" class="event-list"></div>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-const firebaseConfig = {
-    apiKey: "AIzaSyCz6YUc4GHbAHu5neKFUXOy2geO8gICUXo",
-    authDomain: "radin-radar.firebaseapp.com",
-    databaseURL: "https://radin-radar-default-rtdb.firebaseio.com",
-    projectId: "radin-radar"
-};
+const firebaseConfig = { apiKey: "AIzaSyCz6YUc4GHbAHu5neKFUXOy2geO8gICUXo", authDomain: "radin-radar.firebaseapp.com", databaseURL: "https://radin-radar-default-rtdb.firebaseio.com", projectId: "radin-radar" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 const iconesBase = { 
     Meta:'meta.png', Offside:'offside.png', Lateral:'lateral.png', Canto:'canto.png', 
-    Goleiro:'goleiro.png', Parado:'parado.png', Substituição:'sub.png', Falta:'falta.png', 
-    Penalti:'penal.png', 'Gol!':'bola.png', Tempo:'⏱️' 
+    Goleiro:'goleiro.png', Parado:'parado.png', Falta:'falta.png', 
+    Penalti:'penal.png', 'Gol!':'bola.png', Tempo:'tempo.png', Substituição: 'sub.png' 
 };
+
+let editMode = false;
+let draggedItem = null;
 let janelaRadar = null;
 
-function mudarAba(aba) {
-    document.querySelectorAll('.radar-section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-    if(aba === 'casa') {
-        document.getElementById('section-casa').classList.add('active');
-        document.getElementById('btn-tab-casa').classList.add('active');
-    } else {
-        document.getElementById('section-fora').classList.add('active');
-        document.getElementById('btn-tab-fora').classList.add('active');
-    }
+function toggleEdicao() {
+    editMode = !editMode;
+    document.querySelectorAll('.radar-button').forEach(btn => {
+        btn.classList.toggle('editando', editMode);
+        btn.setAttribute('draggable', editMode);
+    });
 }
 
+document.querySelectorAll('.radar-container').forEach(container => {
+    container.addEventListener('dragstart', e => { if(editMode) draggedItem = e.target.closest('.radar-button'); });
+    container.addEventListener('dragover', e => { if(editMode) e.preventDefault(); });
+    container.addEventListener('drop', e => {
+        if(!editMode) return;
+        const target = e.target.closest('.radar-button');
+        if(target && target !== draggedItem) {
+            const children = [...container.children];
+            const fromIdx = children.indexOf(draggedItem);
+            const toIdx = children.indexOf(target);
+            if(fromIdx < toIdx) container.insertBefore(draggedItem, target.nextSibling);
+            else container.insertBefore(draggedItem, target);
+        }
+    });
+});
+
 function add(evento, time){
+    if(editMode) return;
     const tA = document.getElementById('teamA').value || "Casa";
     const tB = document.getElementById('teamB').value || "Fora";
     const team = time === 'A' ? tA : tB;
     const ref = db.ref('eventos');
-    
-    // Lógica para substituir o "Parado" por qualquer novo lance
     if(evento !== 'Parado'){
         ref.orderByChild('teamType').equalTo(time).once('value', snap => {
-            snap.forEach(c => { 
-                if(c.val().evento === 'Parado') c.ref.remove(); 
-            });
+            snap.forEach(c => { if(c.val().evento === 'Parado') c.ref.remove(); });
             ref.push({ evento, team, teamType: time, timestamp: Date.now() });
         });
-    } else {
-        ref.push({ evento, team, teamType: time, timestamp: Date.now() });
-    }
+    } else { ref.push({ evento, team, teamType: time, timestamp: Date.now() }); }
 }
 
-function addTempo() { 
-    db.ref('eventos').push({ evento: 'Tempo', team: '', teamType: '', timestamp: Date.now() }); 
-}
+function addTempo() { db.ref('eventos').push({ evento: 'Tempo', team: '', teamType: '', timestamp: Date.now() }); }
+function addSub() { db.ref('eventos').push({ evento: 'Substituição', team: '', teamType: '', timestamp: Date.now() }); }
 
 db.ref('eventos').on('value', snap => {
     const list = document.getElementById('eventList');
@@ -268,8 +274,9 @@ db.ref('eventos').on('value', snap => {
             if(['Defesa', 'Ataque', 'Perigoso'].includes(e.evento)) {
                 img = e.evento.toLowerCase() + (e.teamType === 'A' ? '-casa.png' : '-fora.png');
             }
-            const iconHTML = (img && img.includes('.png')) ? `<img src="${img}" class="radar-list-img">` : `<span>${img || '⏱️'}</span>`;
-            div.innerHTML = `${iconHTML} ${e.evento === 'Tempo' ? 'Tempo' : e.evento + ' ' + e.team}`;
+            const iconHTML = `<img src="${img}" class="radar-list-img">`;
+            const labelText = (e.evento === 'Tempo' || e.evento === 'Substituição') ? e.evento : e.evento + ' ' + e.team;
+            div.innerHTML = `${iconHTML} ${labelText}`;
             list.prepend(div);
         }
     }
@@ -279,26 +286,7 @@ db.ref('eventos').on('value', snap => {
 function abrirJanela(){
     if(!janelaRadar || janelaRadar.closed){
         janelaRadar = window.open("", "RadarWindow", "width=350,height=600");
-        janelaRadar.document.write(`
-            <html>
-            <head>
-                <style>
-                    html, body { 
-                        background: #111; color: #fff; font-family: Arial; 
-                        padding: 10px; margin: 0; 
-                        overflow-y: scroll; scrollbar-width: none; 
-                    }
-                    body::-webkit-scrollbar { display: none; }
-                    .event-card { 
-                        display: flex; align-items: center; padding: 8px; margin-bottom: 5px; 
-                        border-radius: 8px; background: #1a1a1a; border: 1px solid #333; font-size: 14px;
-                    }
-                    .radar-list-img { width: 18px; height: 18px; margin-right: 7px; }
-                </style>
-            </head>
-            <body><div id="lista-externa"></div></body>
-            </html>
-        `);
+        janelaRadar.document.write(`<html><head><style>html, body { background: #111; color: #fff; font-family: Arial; padding: 10px; margin: 0; overflow-y: scroll; scrollbar-width: none; } body::-webkit-scrollbar { display: none; } .event-card { display: flex; align-items: center; padding: 8px; margin-bottom: 5px; border-radius: 8px; background: #1a1a1a; border: 1px solid #333; font-size: 14px; } .radar-list-img { width: 18px; height: 18px; margin-right: 7px; }</style></head><body><div id="lista-externa"></div></body></html>`);
         janelaRadar.document.close();
     }
     setTimeout(atualizarJanelaExterna, 500);
