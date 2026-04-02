@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Radinho Radar Pro</title>
+<title>Radinho Radar Pro - Final</title>
 
 <style>
+    /* RESET E TRAVA DE MARGEM */
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
     
     body {
-        font-family: sans-serif;
+        font-family: Arial, sans-serif;
         background-color: #0b0b0b;
         color: #fff;
         padding: 10px;
@@ -17,17 +18,19 @@
         flex-direction: column;
         align-items: center;
         overflow-x: hidden;
+        width: 100%;
     }
 
+    /* CONTAINER PADRÃO - SEGURA AS MARGENS IGUAIS PARA TUDO */
     .app-container {
         width: 100%;
-        max-width: 400px;
+        max-width: 380px; /* Largura que você aprovou para alinhar as margens */
         display: flex;
         flex-direction: column;
         gap: 12px;
     }
 
-    /* TOPO EM UMA LINHA: INPUTS + ENGRENAGEM */
+    /* HEADER ALINHADO */
     .header-row {
         display: grid;
         grid-template-columns: 1fr 1fr auto;
@@ -47,6 +50,7 @@
         width: 100%;
     }
 
+    /* BOTÃO CONFIG */
     .btn-config {
         background: none;
         border: none;
@@ -57,14 +61,24 @@
         align-items: center;
     }
 
-    /* CONTROLES SUPERIORES */
+    /* CONTROLES E RADAR PADRONIZADOS */
     .controls {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
-        gap: 4px;
+        gap: 5px;
+        width: 100%;
     }
-    .control-btn {
-        padding: 6px 2px;
+
+    .radar-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        width: 100%;
+    }
+
+    /* ESTILO ÚNICO PARA TODOS OS BOTÕES */
+    .control-btn, .radar-button {
+        padding: 8px 2px;
         border-radius: 12px;
         background: #1a1a1a;
         border: 1px solid #333;
@@ -73,60 +87,50 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        min-height: 50px;
+        min-height: 55px;
+        cursor: pointer;
+        width: 100%;
+        transition: background 0.2s;
     }
-    .control-btn span { font-size: 9px; font-weight: bold; margin-top: 3px; }
-    .control-icon-img { width: 20px; height: 20px; object-fit: contain; }
 
-    /* RÓTULOS CASA/FORA */
+    .control-btn:active, .radar-button:active { background: #333; }
+
+    /* RÓTULOS AZUIS PADRÃO */
     .team-label {
         background-color: #007bff;
         color: #fff;
-        padding: 5px; /* Ajustado para 5px */
+        padding: 5px;
         text-align: center;
         font-weight: bold;
         border-radius: 4px;
         font-size: 14px;
-        text-transform: uppercase;
+        width: 100%;
     }
 
-    /* GRADE RADAR */
-    .radar-container {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
-    }
-
-    .radar-button {
-        aspect-ratio: 1 / 1;
-        border-radius: 10px;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background: #1a1a1a;
-        border: 1px solid #2a2a2a;
-        padding: 5px;
-    }
-
-    .radar-button.editando { border: 2px dashed #007bff !important; }
-
-    .btn-icon-img {
-        width: 35px;
-        height: 35px;
+    /* ÍCONES PADRONIZADOS 22px */
+    .icon-img {
+        width: 22px;
+        height: 22px;
         object-fit: contain;
-        margin-top: 10px;
     }
 
-    .btn-text {
-        position: absolute;
-        top: 5px;
-        font-size: 10px; /* Ajustado para 10px */
+    /* TEXTO PADRONIZADO 10px */
+    .btn-label-text {
+        font-size: 10px;
+        font-weight: bold;
+        margin-top: 4px;
         text-transform: uppercase;
         color: #bbb;
+        pointer-events: none;
     }
 
+    /* ESTILO DE AJUSTE */
+    .radar-button.editando {
+        border: 2px dashed #007bff !important;
+        opacity: 0.7;
+    }
+
+    /* LISTA DE EVENTOS */
     .event-list { width: 100%; margin-top: 10px; }
     .event-card {
         display: flex;
@@ -136,6 +140,7 @@
         border-radius: 8px;
         background: #161616;
         border: 1px solid #222;
+        font-size: 14px;
     }
     .radar-list-img { width: 18px; height: 18px; margin-right: 10px; }
 </style>
@@ -151,43 +156,43 @@
     </div>
 
     <div class="controls">
-        <button class="control-btn" onclick="limparTudo()"><img src="limpar.png" class="control-icon-img"><span>Limpar</span></button>
-        <button class="control-btn" onclick="desfazerUltimo()"><img src="desfazer.png" class="control-icon-img"><span>Desfazer</span></button>
-        <button class="control-btn" onclick="abrirJanela()"><img src="radar.png" class="control-icon-img"><span>Radar</span></button>
-        <button class="control-btn" onclick="addTempo()"><img src="tempo.png" class="control-icon-img"><span>Tempo</span></button>
-        <button class="control-btn" onclick="addSub()"><img src="sub.png" class="control-icon-img"><span>Sub</span></button>
+        <button class="control-btn" onclick="limparTudo()"><img src="limpar.png" class="icon-img"><span class="btn-label-text">Limpar</span></button>
+        <button class="control-btn" onclick="desfazerUltimo()"><img src="desfazer.png" class="icon-img"><span class="btn-label-text">Desfazer</span></button>
+        <button class="control-btn" onclick="abrirJanela()"><img src="radar.png" class="icon-img"><span class="btn-label-text">Radar</span></button>
+        <button class="control-btn" onclick="addTempo()"><img src="tempo.png" class="icon-img"><span class="btn-label-text">Tempo</span></button>
+        <button class="control-btn" onclick="addSub()"><img src="sub.png" class="icon-img"><span class="btn-label-text">Sub</span></button>
     </div>
 
     <div class="team-label">CASA</div>
     <div class="radar-container" id="container-casa">
-        <button class="radar-button" onclick="add('Meta','A')"><span class="btn-text">Meta</span><img src="meta.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Offside','A')"><span class="btn-text">Offside</span><img src="offside.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Lateral','A')"><span class="btn-text">Lateral</span><img src="lateral.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Canto','A')"><span class="btn-text">Canto</span><img src="canto.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Goleiro','A')"><span class="btn-text">Goleiro</span><img src="goleiro.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Defesa','A')"><span class="btn-text">Defesa</span><img src="defesa-casa.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Ataque','A')"><span class="btn-text">Ataque</span><img src="ataque-casa.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Perigoso','A')"><span class="btn-text">Perigoso</span><img src="perigoso-casa.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Parado','A')"><span class="btn-text">Parado</span><img src="parado.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Falta','A')"><span class="btn-text">Falta</span><img src="falta.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Penalti','A')"><span class="btn-text">Penalti</span><img src="penal.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Gol!','A')"><span class="btn-text">Gol!</span><img src="bola.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Meta','A')"><img src="meta.png" class="icon-img"><span class="btn-label-text">Meta</span></button>
+        <button class="radar-button" onclick="add('Offside','A')"><img src="offside.png" class="icon-img"><span class="btn-label-text">Offside</span></button>
+        <button class="radar-button" onclick="add('Lateral','A')"><img src="lateral.png" class="icon-img"><span class="btn-label-text">Lateral</span></button>
+        <button class="radar-button" onclick="add('Canto','A')"><img src="canto.png" class="icon-img"><span class="btn-label-text">Canto</span></button>
+        <button class="radar-button" onclick="add('Goleiro','A')"><img src="goleiro.png" class="icon-img"><span class="btn-label-text">Goleiro</span></button>
+        <button class="radar-button" onclick="add('Defesa','A')"><img src="defesa-casa.png" class="icon-img"><span class="btn-label-text">Defesa</span></button>
+        <button class="radar-button" onclick="add('Ataque','A')"><img src="ataque-casa.png" class="icon-img"><span class="btn-label-text">Ataque</span></button>
+        <button class="radar-button" onclick="add('Perigoso','A')"><img src="perigoso-casa.png" class="icon-img"><span class="btn-label-text">Perigoso</span></button>
+        <button class="radar-button" onclick="add('Parado','A')"><img src="parado.png" class="icon-img"><span class="btn-label-text">Parado</span></button>
+        <button class="radar-button" onclick="add('Falta','A')"><img src="falta.png" class="icon-img"><span class="btn-label-text">Falta</span></button>
+        <button class="radar-button" onclick="add('Penalti','A')"><img src="penal.png" class="icon-img"><span class="btn-label-text">Penalti</span></button>
+        <button class="radar-button" onclick="add('Gol!','A')"><img src="bola.png" class="icon-img"><span class="btn-label-text">Gol!</span></button>
     </div>
 
     <div class="team-label">FORA</div>
     <div class="radar-container" id="container-fora">
-        <button class="radar-button" onclick="add('Meta','B')"><span class="btn-text">Meta</span><img src="meta.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Offside','B')"><span class="btn-text">Offside</span><img src="offside.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Lateral','B')"><span class="btn-text">Lateral</span><img src="lateral.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Canto','B')"><span class="btn-text">Canto</span><img src="canto.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Goleiro','B')"><span class="btn-text">Goleiro</span><img src="goleiro.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Defesa','B')"><span class="btn-text">Defesa</span><img src="defesa-fora.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Ataque','B')"><span class="btn-text">Ataque</span><img src="ataque-fora.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Perigoso','B')"><span class="btn-text">Perigoso</span><img src="perigoso-fora.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Parado','B')"><span class="btn-text">Parado</span><img src="parado.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Falta','B')"><span class="btn-text">Falta</span><img src="falta.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Penalti','B')"><span class="btn-text">Penalti</span><img src="penal.png" class="btn-icon-img"></button>
-        <button class="radar-button" onclick="add('Gol!','B')"><span class="btn-text">Gol!</span><img src="bola.png" class="btn-icon-img"></button>
+        <button class="radar-button" onclick="add('Meta','B')"><img src="meta.png" class="icon-img"><span class="btn-label-text">Meta</span></button>
+        <button class="radar-button" onclick="add('Offside','B')"><img src="offside.png" class="icon-img"><span class="btn-label-text">Offside</span></button>
+        <button class="radar-button" onclick="add('Lateral','B')"><img src="lateral.png" class="icon-img"><span class="btn-label-text">Lateral</span></button>
+        <button class="radar-button" onclick="add('Canto','B')"><img src="canto.png" class="icon-img"><span class="btn-label-text">Canto</span></button>
+        <button class="radar-button" onclick="add('Goleiro','B')"><img src="goleiro.png" class="icon-img"><span class="btn-label-text">Goleiro</span></button>
+        <button class="radar-button" onclick="add('Defesa','B')"><img src="defesa-fora.png" class="icon-img"><span class="btn-label-text">Defesa</span></button>
+        <button class="radar-button" onclick="add('Ataque','B')"><img src="ataque-fora.png" class="icon-img"><span class="btn-label-text">Ataque</span></button>
+        <button class="radar-button" onclick="add('Perigoso','B')"><img src="perigoso-fora.png" class="icon-img"><span class="btn-label-text">Perigoso</span></button>
+        <button class="radar-button" onclick="add('Parado','B')"><img src="parado.png" class="icon-img"><span class="btn-label-text">Parado</span></button>
+        <button class="radar-button" onclick="add('Falta','B')"><img src="falta.png" class="icon-img"><span class="btn-label-text">Falta</span></button>
+        <button class="radar-button" onclick="add('Penalti','B')"><img src="penal.png" class="icon-img"><span class="btn-label-text">Penalti</span></button>
+        <button class="radar-button" onclick="add('Gol!','B')"><img src="bola.png" class="icon-img"><span class="btn-label-text">Gol!</span></button>
     </div>
 
     <div id="eventList" class="event-list"></div>
@@ -249,21 +254,7 @@ db.ref('eventos').on('value', snap => {
 function abrirJanela(){
     if(!janelaRadar || janelaRadar.closed){
         janelaRadar = window.open("", "RadarWindow", "width=350,height=600");
-        janelaRadar.document.write(`
-            <html>
-            <head>
-                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-                <style>
-                    html, body { background: #000; color: #fff; font-family: sans-serif; padding: 10px; margin: 0; overflow: hidden; height: 100%; }
-                    #lista-externa { height: 100%; overflow-y: scroll; scrollbar-width: none; }
-                    #lista-externa::-webkit-scrollbar { display: none; }
-                    .event-card { display: flex; align-items: center; padding: 12px; margin-bottom: 5px; border-radius: 8px; background: #111; border: 1px solid #333; font-size: 14px; }
-                    .radar-list-img { width: 18px; height: 18px; margin-right: 10px; }
-                </style>
-            </head>
-            <body><div id="lista-externa"></div></body>
-            </html>
-        `);
+        janelaRadar.document.write(`<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html, body { background: #000; color: #fff; font-family: sans-serif; padding: 10px; margin: 0; overflow: hidden; height: 100%; } #lista-externa { height: 100%; overflow-y: scroll; scrollbar-width: none; } #lista-externa::-webkit-scrollbar { display: none; } .event-card { display: flex; align-items: center; padding: 12px; margin-bottom: 5px; border-radius: 8px; background: #111; border: 1px solid #333; font-size: 14px; } .radar-list-img { width: 18px; height: 18px; margin-right: 10px; }</style></head><body><div id="lista-externa"></div></body></html>`);
         janelaRadar.document.close();
     }
     setTimeout(atualizarJanelaExterna, 500);
