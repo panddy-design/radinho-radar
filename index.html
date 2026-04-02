@@ -6,7 +6,8 @@
 <title>Radinho Radar Pro</title>
 
 <style>
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
     body {
         font-family: Arial, sans-serif;
         background-color: #111;
@@ -18,9 +19,10 @@
         align-items: center;
     }
 
+    /* CONTAINER PRINCIPAL PARA ALINHAMENTO DE MARGEM */
     .app-container {
         width: 100%;
-        max-width: 380px;
+        max-width: 380px; 
         display: flex;
         flex-direction: column;
         gap: 15px;
@@ -49,7 +51,7 @@
         text-align: center;
     }
 
-    /* CONTROLES SUPERIORES */
+    /* CONTROLES SUPERIORES (TAMANHO RESTAURADO) */
     .controls {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
@@ -57,7 +59,7 @@
         width: 100%;
     }
     .control-btn {
-        padding: 8px 5px;
+        padding: 8px 2px;
         border-radius: 15px;
         font-size: 11px;
         background: linear-gradient(90deg, #1a1a1a, #2a2a2a);
@@ -72,7 +74,7 @@
     }
 
     .control-icon-img {
-        width: 22px;
+        width: 22px; /* Tamanho original restaurado */
         height: 22px;
         object-fit: contain;
         margin-bottom: 3px;
@@ -89,7 +91,7 @@
         text-transform: uppercase;
     }
 
-    /* GRADE RADAR */
+    /* GRADE RADAR (TAMANHO ORIGINAL DOS ÍCONES) */
     .radar-container {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -108,7 +110,7 @@
         background: #1a1a1a;
         border: 1px solid #444;
         cursor: pointer;
-        padding-top: 12px;
+        padding-top: 10px;
     }
 
     .radar-button.editando {
@@ -117,10 +119,11 @@
     }
 
     .btn-icon-img {
-        width: 35px !important;
+        width: 35px !important; /* Tamanho original restaurado */
         height: 35px !important;
         object-fit: contain;
         pointer-events: none;
+        margin-top: 5px;
     }
 
     .btn-text {
@@ -210,11 +213,7 @@ const firebaseConfig = { apiKey: "AIzaSyCz6YUc4GHbAHu5neKFUXOy2geO8gICUXo", auth
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const iconesBase = { 
-    Meta:'meta.png', Offside:'offside.png', Lateral:'lateral.png', Canto:'canto.png', 
-    Goleiro:'goleiro.png', Parado:'parado.png', Falta:'falta.png', 
-    Penalti:'penal.png', 'Gol!':'bola.png', Tempo:'tempo.png', Substituição: 'sub.png' 
-};
+const iconesBase = { Meta:'meta.png', Offside:'offside.png', Lateral:'lateral.png', Canto:'canto.png', Goleiro:'goleiro.png', Parado:'parado.png', Falta:'falta.png', Penalti:'penal.png', 'Gol!':'bola.png', Tempo:'tempo.png', Substituição: 'sub.png' };
 
 let editMode = false;
 let draggedItem = null;
@@ -271,9 +270,7 @@ db.ref('eventos').on('value', snap => {
             const div = document.createElement('div');
             div.className = 'event-card';
             let img = iconesBase[e.evento];
-            if(['Defesa', 'Ataque', 'Perigoso'].includes(e.evento)) {
-                img = e.evento.toLowerCase() + (e.teamType === 'A' ? '-casa.png' : '-fora.png');
-            }
+            if(['Defesa', 'Ataque', 'Perigoso'].includes(e.evento)) img = e.evento.toLowerCase() + (e.teamType === 'A' ? '-casa.png' : '-fora.png');
             const iconHTML = `<img src="${img}" class="radar-list-img">`;
             const labelText = (e.evento === 'Tempo' || e.evento === 'Substituição') ? e.evento : e.evento + ' ' + e.team;
             div.innerHTML = `${iconHTML} ${labelText}`;
@@ -283,19 +280,37 @@ db.ref('eventos').on('value', snap => {
     if(janelaRadar && !janelaRadar.closed) atualizarJanelaExterna();
 });
 
+// FUNÇÃO DA JANELA EXTERNA (COM FIX DE SCROLLBAR)
 function abrirJanela(){
     if(!janelaRadar || janelaRadar.closed){
         janelaRadar = window.open("", "RadarWindow", "width=350,height=600");
-        janelaRadar.document.write(`<html><head><style>html, body { background: #111; color: #fff; font-family: Arial; padding: 10px; margin: 0; overflow-y: scroll; scrollbar-width: none; } body::-webkit-scrollbar { display: none; } .event-card { display: flex; align-items: center; padding: 8px; margin-bottom: 5px; border-radius: 8px; background: #1a1a1a; border: 1px solid #333; font-size: 14px; } .radar-list-img { width: 18px; height: 18px; margin-right: 7px; }</style></head><body><div id="lista-externa"></div></body></html>`);
+        janelaRadar.document.write(`
+            <html>
+            <head>
+                <style>
+                    html, body { 
+                        background: #111; color: #fff; font-family: Arial; 
+                        padding: 10px; margin: 0; 
+                        overflow-y: scroll; scrollbar-width: none; 
+                    }
+                    body::-webkit-scrollbar { display: none; }
+                    .event-card { 
+                        display: flex; align-items: center; padding: 12px; margin-bottom: 5px; 
+                        border-radius: 8px; background: #1a1a1a; border: 1px solid #333; font-size: 14px;
+                    }
+                    .radar-list-img { width: 18px; height: 18px; margin-right: 7px; }
+                </style>
+            </head>
+            <body><div id="lista-externa"></div></body>
+            </html>
+        `);
         janelaRadar.document.close();
     }
     setTimeout(atualizarJanelaExterna, 500);
 }
 
 function atualizarJanelaExterna(){
-    if(janelaRadar && !janelaRadar.closed) {
-        janelaRadar.document.getElementById('lista-externa').innerHTML = document.getElementById('eventList').innerHTML;
-    }
+    if(janelaRadar && !janelaRadar.closed) janelaRadar.document.getElementById('lista-externa').innerHTML = document.getElementById('eventList').innerHTML;
 }
 
 function limparTudo(){ db.ref('eventos').remove(); }
