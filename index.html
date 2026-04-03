@@ -5,38 +5,162 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Radar Pro Scout - Final Fix</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0b0b">
+
+<title>Radinho Radar Pro</title>
 
 <style>
-    /* RESET E LAYOUT */
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-    body { font-family: Arial, sans-serif; background-color: #0b0b0b; color: #fff; padding: 10px; display: flex; flex-direction: column; align-items: center; width: 100%; overflow-x: hidden; overscroll-behavior-y: contain; }
-    .app-container { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 12px; }
-
-    /* HEADER */
-    .header-row { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 8px; align-items: center; width: 100%; }
-    input { padding: 8px; border-radius: 5px; border: 1px solid #444; background: #222; color: #fff; text-align: center; font-size: 14px; width: 100%; }
-    .btn-header { background: none; border: none; font-size: 22px; cursor: pointer; color: #fff; padding: 5px; display: flex; align-items: center; }
-    #micBtn.active { color: #ff3b3b; text-shadow: 0 0 10px #ff3b3b; }
-
-    /* CONTROLES */
-    .controls { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; width: 100%; }
-    .control-btn { padding: 8px 2px; border-radius: 15px; font-size: 11px; background: #1a1a1a; border: 1px solid #444; color: #fff; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 55px; cursor: pointer; }
-    .control-icon-img { width: 20px; height: 20px; object-fit: contain; margin-bottom: 3px; }
-
-    /* RADAR */
-    .team-label { background-color: #007bff; color: #fff; padding: 5px; text-align: center; font-weight: bold; border-radius: 4px; font-size: 14px; width: 100%; text-transform: uppercase; }
-    .radar-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; }
-    .radar-button { position: relative; padding-top: 18px; border-radius: 12px; background: #1a1a1a; border: 1px solid #333; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 65px; cursor: pointer; }
-    .radar-icon-img { width: 24px; height: 24px; object-fit: contain; }
-    .btn-label-text { position: absolute; top: 6px; font-size: 10px; font-weight: bold; text-transform: uppercase; color: #bbb; pointer-events: none; }
+    * { 
+        box-sizing: border-box; 
+        -webkit-tap-highlight-color: transparent; 
+        margin: 0; padding: 0; 
+    }
     
-    /* MODO EDIÇÃO */
-    .radar-button.editando { border: 2px dashed #007bff !important; opacity: 0.7; }
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #0b0b0b;
+        color: #fff;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow-x: hidden;
+        width: 100%;
+        /* Evita puxar para atualizar no Chrome */
+        overscroll-behavior-y: contain; 
+    }
 
-    /* LISTA DE EVENTOS */
+    .app-container {
+        width: 100%;
+        max-width: 380px; 
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .header-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 8px;
+        align-items: center;
+        width: 100%;
+    }
+
+    input {
+        padding: 8px;
+        border-radius: 5px;
+        border: 1px solid #444;
+        background: #222;
+        color: #fff;
+        text-align: center;
+        font-size: 14px;
+        width: 100%;
+    }
+
+    .btn-config {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #fff;
+        display: flex;
+        align-items: center;
+    }
+
+    /* CONTROLES ARREDONDADOS */
+    .controls {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 5px;
+        width: 100%;
+    }
+    .control-btn {
+        padding: 8px 2px;
+        border-radius: 15px;
+        font-size: 11px;
+        background: #1a1a1a;
+        border: 1px solid #444;
+        color: #fff;
+        cursor: pointer;
+        font-weight: bold;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 55px;
+    }
+    .control-icon-img {
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
+        margin-bottom: 3px;
+    }
+
+    .team-label {
+        background-color: #007bff;
+        color: #fff;
+        padding: 5px;
+        text-align: center;
+        font-weight: bold;
+        border-radius: 4px;
+        font-size: 14px;
+        width: 100%;
+        text-transform: uppercase;
+    }
+
+    /* RADAR: TEXTO NO TOPO E ÍCONE CENTRAL */
+    .radar-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        width: 100%;
+    }
+    .radar-button {
+        position: relative;
+        padding-top: 18px; 
+        border-radius: 12px;
+        background: #1a1a1a;
+        border: 1px solid #333;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 65px; 
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .radar-icon-img {
+        width: 24px; /* 10% maior */
+        height: 24px;
+        object-fit: contain;
+    }
+
+    .btn-label-text {
+        position: absolute;
+        top: 6px;
+        font-size: 10px;
+        font-weight: bold;
+        text-transform: uppercase;
+        color: #bbb;
+        pointer-events: none;
+    }
+
+    .radar-button.editando { border: 2px dashed #007bff !important; }
+
     .event-list { width: 100%; margin-top: 10px; }
-    .event-card { display: flex; align-items: center; padding: 10px; margin-bottom: 6px; border-radius: 8px; background: #161616; border: 1px solid #222; font-size: 14px; }
+    .event-card {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        margin-bottom: 6px;
+        border-radius: 8px;
+        background: #161616;
+        border: 1px solid #222;
+        font-size: 14px;
+    }
     .radar-list-img { width: 18px; height: 18px; margin-right: 10px; }
 </style>
 </head>
@@ -46,8 +170,7 @@
     <div class="header-row">
         <input id="teamA" value="Casa">
         <input id="teamB" value="Fora">
-        <button id="micBtn" class="btn-header" onclick="toggleVoz()">🎤</button>
-        <button class="btn-header" onclick="toggleEdicao()">⚙️</button>
+        <button class="btn-config" onclick="toggleEdicao()">⚙️</button>
     </div>
 
     <div class="controls">
@@ -58,7 +181,7 @@
         <button class="control-btn" onclick="addSub()"><img src="sub.png" class="control-icon-img">Sub</button>
     </div>
 
-    <div class="team-label">CASA (1)</div>
+    <div class="team-label">CASA</div>
     <div class="radar-container" id="container-casa">
         <button class="radar-button" onclick="add('Meta','A')"><span class="btn-label-text">Meta</span><img src="meta.png" class="radar-icon-img"></button>
         <button class="radar-button" onclick="add('Offside','A')"><span class="btn-label-text">Offside</span><img src="offside.png" class="radar-icon-img"></button>
@@ -74,7 +197,7 @@
         <button class="radar-button" onclick="add('Gol!','A')"><span class="btn-label-text">Gol!</span><img src="bola.png" class="radar-icon-img"></button>
     </div>
 
-    <div class="team-label">FORA (2)</div>
+    <div class="team-label">FORA</div>
     <div class="radar-container" id="container-fora">
         <button class="radar-button" onclick="add('Meta','B')"><span class="btn-label-text">Meta</span><img src="meta.png" class="radar-icon-img"></button>
         <button class="radar-button" onclick="add('Offside','B')"><span class="btn-label-text">Offside</span><img src="offside.png" class="radar-icon-img"></button>
@@ -105,135 +228,61 @@ const iconesBase = { Meta:'meta.png', Offside:'offside.png', Lateral:'lateral.pn
 
 let editMode = false;
 let janelaRadar = null;
-let gravando = false;
-let recognition;
-let lockVoz = false;
 
-// DICIONÁRIO DE COMANDOS COMPLETO
-const comandosVoz = {
-    "meta": "Meta",
-    "tiro de meta": "Meta",
-    "impedimento": "Offside",
-    "offside": "Offside",
-    "lateral": "Lateral",
-    "canto": "Canto",
-    "escanteio": "Canto",
-    "goleiro": "Goleiro",
-    "defesa": "Defesa",
-    "zaga": "Defesa",
-    "ataque": "Ataque",
-    "perigoso": "Perigoso",
-    "ataque perigoso": "Perigoso",
-    "parado": "Parado",
-    "falta": "Falta",
-    "pênalti": "Penalti",
-    "gol": "Gol!"
-};
-
-if ('webkitSpeechRecognition' in window) {
-    recognition = new webkitSpeechRecognition();
-    recognition.lang = 'pt-BR';
-    recognition.continuous = true;
-    recognition.interimResults = true;
-
-    recognition.onresult = (event) => {
-        if (lockVoz) return;
-        let texto = "";
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-            texto += event.results[i][0].transcript;
-        }
-        processarComandoVoz(texto.toLowerCase());
-    };
-    recognition.onend = () => { if(gravando) recognition.start(); };
-}
-
-function processarComandoVoz(t) {
-    for (let chave in comandosVoz) {
-        if (t.includes(chave)) {
-            let time = null;
-            // Busca por "1" ou "2" (numeral ou escrito)
-            if (t.includes(" 1") || t.includes(" um")) time = "A";
-            else if (t.includes(" 2") || t.includes(" dois")) time = "B";
-
-            if (time) {
-                lockVoz = true;
-                add(comandosVoz[chave], time);
-                
-                // Feedback visual e sonoro
-                console.log("Voz captada: " + comandosVoz[chave] + " Time: " + time);
-                if(navigator.vibrate) navigator.vibrate(100);
-                
-                // Reinicia o mic para limpar o lixo da fala
-                recognition.stop();
-                setTimeout(() => { lockVoz = false; }, 1000);
-                break;
-            }
-        }
-    }
+function toggleEdicao() {
+    editMode = !editMode;
+    document.querySelectorAll('.radar-button').forEach(btn => btn.classList.toggle('editando', editMode));
 }
 
 function add(evento, time){
     if(editMode) return;
-    const teamInput = time === 'A' ? document.getElementById('teamA') : document.getElementById('teamB');
-    const teamName = teamInput ? teamInput.value : (time === 'A' ? 'Casa' : 'Fora');
-    
-    db.ref('eventos').push({
-        evento: evento,
-        team: teamName,
-        teamType: time,
-        timestamp: Date.now()
-    });
+    const team = time === 'A' ? document.getElementById('teamA').value : document.getElementById('teamB').value;
+    const ref = db.ref('eventos');
+    if(evento !== 'Parado'){
+        ref.orderByChild('teamType').equalTo(time).once('value', snap => {
+            snap.forEach(c => { if(c.val().evento === 'Parado') c.ref.remove(); });
+            ref.push({ evento, team, teamType: time, timestamp: Date.now() });
+        });
+    } else { ref.push({ evento, team, teamType: time, timestamp: Date.now() }); }
 }
 
-function toggleVoz() {
-    const btn = document.getElementById('micBtn');
-    if (!gravando) {
-        recognition.start();
-        btn.classList.add('active');
-        gravando = true;
-    } else {
-        gravando = false;
-        recognition.stop();
-        btn.classList.remove('active');
-    }
-}
-
-function abrirJanela(){
-    janelaRadar = window.open("", "RadarWindow", "width=350,height=600");
-    janelaRadar.document.write(`<html><head><title>Radar</title><style>body{background:#000;color:#fff;font-family:sans-serif} .card{padding:10px;border-bottom:1px solid #222;display:flex;align-items:center} img{width:20px;margin-right:10px}</style></head><body><div id="lista"></div></body></html>`);
-    sincronizarJanela();
-}
-
-function sincronizarJanela() {
-    if(janelaRadar && !janelaRadar.closed) {
-        janelaRadar.document.getElementById('lista').innerHTML = document.getElementById('eventList').innerHTML;
-    }
-}
-
-function limparTudo(){ if(confirm("Limpar?")) db.ref('eventos').remove(); }
-function desfazerUltimo(){ db.ref('eventos').orderByChild('timestamp').limitToLast(1).once('value', s => s.forEach(c => c.ref.remove())); }
-function addTempo() { add('Tempo', 'A'); }
-function addSub() { add('Substituição', 'A'); }
-function toggleEdicao() { editMode = !editMode; document.querySelectorAll('.radar-button').forEach(b => b.classList.toggle('editando')); }
+function addTempo() { db.ref('eventos').push({ evento: 'Tempo', team: '', teamType: '', timestamp: Date.now() }); }
+function addSub() { db.ref('eventos').push({ evento: 'Substituição', team: '', teamType: '', timestamp: Date.now() }); }
 
 db.ref('eventos').on('value', snap => {
     const list = document.getElementById('eventList');
     list.innerHTML = '';
     const data = snap.val();
     if (data) {
-        Object.values(data).reverse().forEach(e => {
+        for (let k in data){
+            const e = data[k];
             const div = document.createElement('div');
             div.className = 'event-card';
-            let img = iconesBase[e.evento] || 'bola.png';
-            if(['Defesa', 'Ataque', 'Perigoso'].includes(e.evento)) {
-                img = e.evento.toLowerCase() + (e.teamType === 'A' ? '-casa.png' : '-fora.png');
-            }
-            div.innerHTML = `<img src="${img}" class="radar-list-img"> ${e.evento} ${e.team}`;
-            list.appendChild(div);
-        });
+            let img = iconesBase[e.evento];
+            if(['Defesa', 'Ataque', 'Perigoso'].includes(e.evento)) img = e.evento.toLowerCase() + (e.teamType === 'A' ? '-casa.png' : '-fora.png');
+            div.innerHTML = `<img src="${img}" class="radar-list-img"> ${ (e.evento==='Tempo'||e.evento==='Substituição') ? e.evento : e.evento+' '+e.team }`;
+            list.prepend(div);
+        }
     }
-    sincronizarJanela();
+    if(janelaRadar && !janelaRadar.closed) atualizarJanelaExterna();
 });
+
+function abrirJanela(){
+    if(!janelaRadar || janelaRadar.closed){
+        janelaRadar = window.open("", "RadarWindow", "width=350,height=600");
+        janelaRadar.document.write(`<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html, body { background: #000; color: #fff; font-family: sans-serif; padding: 10px; margin: 0; overflow: hidden; height: 100%; } #lista-externa { height: 100%; overflow-y: scroll; scrollbar-width: none; } #lista-externa::-webkit-scrollbar { display: none; } .event-card { display: flex; align-items: center; padding: 12px; margin-bottom: 5px; border-radius: 8px; background: #111; border: 1px solid #333; font-size: 14px; } .radar-list-img { width: 18px; height: 18px; margin-right: 10px; }</style></head><body><div id="lista-externa"></div></body></html>`);
+        janelaRadar.document.close();
+    }
+    setTimeout(atualizarJanelaExterna, 500);
+}
+
+function atualizarJanelaExterna(){
+    if(janelaRadar && !janelaRadar.closed) janelaRadar.document.getElementById('lista-externa').innerHTML = document.getElementById('eventList').innerHTML;
+}
+
+function limparTudo(){ db.ref('eventos').remove(); }
+function desfazerUltimo(){ db.ref('eventos').orderByChild('timestamp').limitToLast(1).once('value', s => s.forEach(c => c.ref.remove())); }
 </script>
+
 </body>
 </html>
