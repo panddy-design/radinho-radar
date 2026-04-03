@@ -3,22 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Radar Pro - Voz Numeral</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Radar Pro Scout</title>
 
 <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-    body { font-family: Arial, sans-serif; background-color: #0b0b0b; color: #fff; padding: 10px; display: flex; flex-direction: column; align-items: center; width: 100%; overflow-x: hidden; }
+    body { font-family: Arial, sans-serif; background-color: #0b0b0b; color: #fff; padding: 10px; display: flex; flex-direction: column; align-items: center; width: 100%; overflow-x: hidden; overscroll-behavior-y: contain; }
     .app-container { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 12px; }
+
     .header-row { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 8px; align-items: center; width: 100%; }
     input { padding: 8px; border-radius: 5px; border: 1px solid #444; background: #222; color: #fff; text-align: center; font-size: 14px; width: 100%; }
-    .btn-header { background: none; border: none; font-size: 22px; cursor: pointer; color: #fff; padding: 5px; }
+    
+    .btn-header { background: none; border: none; font-size: 22px; cursor: pointer; color: #fff; padding: 5px; display: flex; align-items: center; }
     #micBtn.active { color: #ff3b3b; text-shadow: 0 0 10px #ff3b3b; animation: pulse 1s infinite; }
     @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-    
+
+    #statusVoz { font-size: 11px; color: #555; text-align: center; margin-top: -5px; height: 15px; }
+
     .controls { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; width: 100%; }
     .control-btn { padding: 8px 2px; border-radius: 15px; font-size: 11px; background: #1a1a1a; border: 1px solid #444; color: #fff; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 55px; }
     .control-icon-img { width: 20px; height: 20px; object-fit: contain; margin-bottom: 3px; }
-    
+
     .team-label { background-color: #007bff; color: #fff; padding: 5px; text-align: center; font-weight: bold; border-radius: 4px; font-size: 14px; width: 100%; text-transform: uppercase; }
     
     .radar-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; }
@@ -36,6 +42,7 @@
         <button id="micBtn" class="btn-header" onclick="toggleVoz()">🎤</button>
         <button class="btn-header" onclick="toggleEdicao()">⚙️</button>
     </div>
+    <div id="statusVoz">Voz inativa</div>
 
     <div class="controls">
         <button class="control-btn" onclick="limparTudo()"><img src="limpar.png" class="control-icon-img">Limpar</button>
@@ -88,7 +95,7 @@ const db = firebase.database();
 
 let gravando = false;
 let recognition;
-let bloqueio = false;
+let lock = false;
 
 if ('webkitSpeechRecognition' in window) {
     recognition = new webkitSpeechRecognition();
@@ -97,36 +104,31 @@ if ('webkitSpeechRecognition' in window) {
     recognition.interimResults = true;
 
     recognition.onresult = (event) => {
-        if (bloqueio) return;
-        let texto = "";
+        if (lock) return;
+        let final_transcript = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
-            texto += event.results[i][0].transcript;
+            if (event.results[i].isFinal) final_transcript += event.results[i][0].transcript;
         }
-        analisarVoz(texto.toLowerCase());
+        if (final_transcript) processarVoz(final_transcript.toLowerCase());
     };
 
     recognition.onend = () => { if (gravando) recognition.start(); };
 }
 
-function analisarVoz(t) {
-    const comandos = {
-        "meta": "Meta", "lateral": "Lateral", "canto": "Canto", "escanteio": "Canto",
-        "ataque": "Ataque", "perigoso": "Perigoso", "falta": "Falta", "gol": "Gol!", "pênalti": "Penalti"
-    };
-
+function processarVoz(t) {
+    const comandos = { "meta": "Meta", "lateral": "Lateral", "canto": "Canto", "escanteio": "Canto", "ataque": "Ataque", "perigoso": "Perigoso", "falta": "Falta", "gol": "Gol!" };
+    
     for (let chave in comandos) {
         if (t.includes(chave)) {
             let time = null;
-            // Verifica numeral 1 ou 2 (escrito ou dígito)
-            if (t.includes(chave + " 1") || t.includes(chave + " um")) time = "A";
-            else if (t.includes(chave + " 2") || t.includes(chave + " dois")) time = "B";
+            if (t.match(/\b1\b/) || t.includes(" um")) time = "A";
+            else if (t.match(/\b2\b/) || t.includes(" dois")) time = "B";
 
             if (time) {
-                bloqueio = true;
+                lock = true;
                 add(comandos[chave], time);
                 if (navigator.vibrate) navigator.vibrate(100);
-                recognition.stop();
-                setTimeout(() => { bloqueio = false; }, 1200);
+                setTimeout(() => { lock = false; }, 1000);
                 break;
             }
         }
@@ -135,26 +137,28 @@ function analisarVoz(t) {
 
 function toggleVoz() {
     const btn = document.getElementById('micBtn');
+    const status = document.getElementById('statusVoz');
     if (!gravando) {
         recognition.start();
         btn.classList.add('active');
+        status.innerText = "Ouvindo (Ex: Lateral 1)...";
         gravando = true;
     } else {
         gravando = false;
         recognition.stop();
         btn.classList.remove('active');
+        status.innerText = "Voz inativa";
     }
 }
 
 function add(evento, time){
     const team = time === 'A' ? document.getElementById('teamA').value : document.getElementById('teamB').value;
-    const ref = db.ref('eventos');
-    ref.push({ evento, team, teamType: time, timestamp: Date.now() });
+    db.ref('eventos').push({ evento, team, teamType: time, timestamp: Date.now() });
 }
 
-function limparTudo(){ if(confirm("Limpar tudo?")) db.ref('eventos').remove(); }
+function limparTudo(){ if(confirm("Limpar?")) db.ref('eventos').remove(); }
 function desfazerUltimo(){ db.ref('eventos').orderByChild('timestamp').limitToLast(1).once('value', s => s.forEach(c => c.ref.remove())); }
-function toggleEdicao() { /* ... */ }
+function toggleEdicao() { /* Reservado */ }
 </script>
 </body>
 </html>
