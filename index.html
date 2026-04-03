@@ -107,30 +107,29 @@ let editMode = false;
 let janelaRadar = null;
 let gravando = false;
 let recognition;
+let lockVoz = false;
 
-// FUNÇÃO ADD CORRIGIDA
-function add(evento, time){
-    if(editMode) return;
-    const team = time === 'A' ? document.getElementById('teamA').value : document.getElementById('teamB').value;
-    const ref = db.ref('eventos');
-    ref.push({ evento, team, teamType: time, timestamp: Date.now() });
-    if(navigator.vibrate) navigator.vibrate(50);
-}
+// DICIONÁRIO DE COMANDOS COMPLETO
+const comandosVoz = {
+    "meta": "Meta",
+    "tiro de meta": "Meta",
+    "impedimento": "Offside",
+    "offside": "Offside",
+    "lateral": "Lateral",
+    "canto": "Canto",
+    "escanteio": "Canto",
+    "goleiro": "Goleiro",
+    "defesa": "Defesa",
+    "zaga": "Defesa",
+    "ataque": "Ataque",
+    "perigoso": "Perigoso",
+    "ataque perigoso": "Perigoso",
+    "parado": "Parado",
+    "falta": "Falta",
+    "pênalti": "Penalti",
+    "gol": "Gol!"
+};
 
-// JANELA EXTERNA CORRIGIDA
-function abrirJanela(){
-    janelaRadar = window.open("", "RadarWindow", "width=350,height=600");
-    janelaRadar.document.write(`<html><head><title>Radar View</title><style>body{background:#000;color:#fff;font-family:sans-serif;padding:10px} .event-card{display:flex;align-items:center;padding:10px;margin-bottom:5px;background:#111;border:1px solid #333;border-radius:8px} .radar-list-img{width:20px;margin-right:10px}</style></head><body><div id="lista-externa"></div></body></html>`);
-    atualizarJanelaExterna();
-}
-
-function atualizarJanelaExterna(){
-    if(janelaRadar && !janelaRadar.closed) {
-        janelaRadar.document.getElementById('lista-externa').innerHTML = document.getElementById('eventList').innerHTML;
-    }
-}
-
-// VOZ CORRIGIDA
 if ('webkitSpeechRecognition' in window) {
     recognition = new webkitSpeechRecognition();
     recognition.lang = 'pt-BR';
@@ -138,48 +137,85 @@ if ('webkitSpeechRecognition' in window) {
     recognition.interimResults = true;
 
     recognition.onresult = (event) => {
+        if (lockVoz) return;
         let texto = "";
         for (let i = event.resultIndex; i < event.results.length; ++i) {
             texto += event.results[i][0].transcript;
         }
-        processarVoz(texto.toLowerCase());
+        processarComandoVoz(texto.toLowerCase());
     };
     recognition.onend = () => { if(gravando) recognition.start(); };
 }
 
-function processarVoz(t) {
-    const comandos = { "meta": "Meta", "lateral": "Lateral", "canto": "Canto", "escanteio": "Canto", "ataque": "Ataque", "perigoso": "Perigoso", "falta": "Falta", "gol": "Gol!" };
-    for (let chave in comandos) {
+function processarComandoVoz(t) {
+    for (let chave in comandosVoz) {
         if (t.includes(chave)) {
             let time = null;
+            // Busca por "1" ou "2" (numeral ou escrito)
             if (t.includes(" 1") || t.includes(" um")) time = "A";
             else if (t.includes(" 2") || t.includes(" dois")) time = "B";
+
             if (time) {
-                add(comandos[chave], time);
+                lockVoz = true;
+                add(comandosVoz[chave], time);
+                
+                // Feedback visual e sonoro
+                console.log("Voz captada: " + comandosVoz[chave] + " Time: " + time);
+                if(navigator.vibrate) navigator.vibrate(100);
+                
+                // Reinicia o mic para limpar o lixo da fala
                 recognition.stop();
+                setTimeout(() => { lockVoz = false; }, 1000);
                 break;
             }
         }
     }
 }
 
+function add(evento, time){
+    if(editMode) return;
+    const teamInput = time === 'A' ? document.getElementById('teamA') : document.getElementById('teamB');
+    const teamName = teamInput ? teamInput.value : (time === 'A' ? 'Casa' : 'Fora');
+    
+    db.ref('eventos').push({
+        evento: evento,
+        team: teamName,
+        teamType: time,
+        timestamp: Date.now()
+    });
+}
+
 function toggleVoz() {
     const btn = document.getElementById('micBtn');
-    if (!gravando) { recognition.start(); btn.classList.add('active'); gravando = true; }
-    else { gravando = false; recognition.stop(); btn.classList.remove('active'); }
+    if (!gravando) {
+        recognition.start();
+        btn.classList.add('active');
+        gravando = true;
+    } else {
+        gravando = false;
+        recognition.stop();
+        btn.classList.remove('active');
+    }
 }
 
-function toggleEdicao() {
-    editMode = !editMode;
-    document.querySelectorAll('.radar-button').forEach(btn => btn.classList.toggle('editando', editMode));
+function abrirJanela(){
+    janelaRadar = window.open("", "RadarWindow", "width=350,height=600");
+    janelaRadar.document.write(`<html><head><title>Radar</title><style>body{background:#000;color:#fff;font-family:sans-serif} .card{padding:10px;border-bottom:1px solid #222;display:flex;align-items:center} img{width:20px;margin-right:10px}</style></head><body><div id="lista"></div></body></html>`);
+    sincronizarJanela();
 }
 
-function limparTudo(){ if(confirm("Limpar tudo?")) db.ref('eventos').remove(); }
+function sincronizarJanela() {
+    if(janelaRadar && !janelaRadar.closed) {
+        janelaRadar.document.getElementById('lista').innerHTML = document.getElementById('eventList').innerHTML;
+    }
+}
+
+function limparTudo(){ if(confirm("Limpar?")) db.ref('eventos').remove(); }
 function desfazerUltimo(){ db.ref('eventos').orderByChild('timestamp').limitToLast(1).once('value', s => s.forEach(c => c.ref.remove())); }
-function addTempo() { add('Tempo', ''); }
-function addSub() { add('Substituição', ''); }
+function addTempo() { add('Tempo', 'A'); }
+function addSub() { add('Substituição', 'A'); }
+function toggleEdicao() { editMode = !editMode; document.querySelectorAll('.radar-button').forEach(b => b.classList.toggle('editando')); }
 
-// SINCRONIZAÇÃO FIREBASE
 db.ref('eventos').on('value', snap => {
     const list = document.getElementById('eventList');
     list.innerHTML = '';
@@ -189,12 +225,14 @@ db.ref('eventos').on('value', snap => {
             const div = document.createElement('div');
             div.className = 'event-card';
             let img = iconesBase[e.evento] || 'bola.png';
-            if(['Defesa', 'Ataque', 'Perigoso'].includes(e.evento)) img = e.evento.toLowerCase() + (e.teamType === 'A' ? '-casa.png' : '-fora.png');
-            div.innerHTML = `<img src="${img}" class="radar-list-img"> ${e.evento} ${e.team || ''}`;
+            if(['Defesa', 'Ataque', 'Perigoso'].includes(e.evento)) {
+                img = e.evento.toLowerCase() + (e.teamType === 'A' ? '-casa.png' : '-fora.png');
+            }
+            div.innerHTML = `<img src="${img}" class="radar-list-img"> ${e.evento} ${e.team}`;
             list.appendChild(div);
         });
     }
-    atualizarJanelaExterna();
+    sincronizarJanela();
 });
 </script>
 </body>
