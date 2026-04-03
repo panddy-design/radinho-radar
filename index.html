@@ -5,32 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0b0b0b">
-<title>Radar Pro Scout - Voz</title>
+<title>Radar Pro - Voz Precisa</title>
 
 <style>
+    /* ... (Mantive seu CSS aprovado) ... */
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; background-color: #0b0b0b; color: #fff; padding: 10px; display: flex; flex-direction: column; align-items: center; width: 100%; overflow-x: hidden; overscroll-behavior-y: contain; }
     .app-container { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 12px; }
-
     .header-row { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 8px; align-items: center; width: 100%; }
     input { padding: 8px; border-radius: 5px; border: 1px solid #444; background: #222; color: #fff; text-align: center; font-size: 14px; width: 100%; }
-    
-    .btn-header { background: none; border: none; font-size: 22px; cursor: pointer; color: #fff; padding: 5px; display: flex; align-items: center; }
+    .btn-header { background: none; border: none; font-size: 22px; cursor: pointer; color: #fff; padding: 5px; }
     #micBtn.active { color: #ff3b3b; text-shadow: 0 0 10px #ff3b3b; animation: pulse 1s infinite; }
     @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
     .controls { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; width: 100%; }
     .control-btn { padding: 8px 2px; border-radius: 15px; font-size: 11px; background: #1a1a1a; border: 1px solid #444; color: #fff; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 55px; }
     .control-icon-img { width: 20px; height: 20px; object-fit: contain; margin-bottom: 3px; }
-
     .team-label { background-color: #007bff; color: #fff; padding: 5px; text-align: center; font-weight: bold; border-radius: 4px; font-size: 14px; width: 100%; text-transform: uppercase; }
-    
     .radar-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; }
     .radar-button { position: relative; padding-top: 18px; border-radius: 12px; background: #1a1a1a; border: 1px solid #333; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 65px; cursor: pointer; }
     .radar-icon-img { width: 24px; height: 24px; object-fit: contain; }
     .btn-label-text { position: absolute; top: 6px; font-size: 10px; font-weight: bold; text-transform: uppercase; color: #bbb; pointer-events: none; }
-
     .event-list { width: 100%; margin-top: 10px; }
     .event-card { display: flex; align-items: center; padding: 10px; margin-bottom: 6px; border-radius: 8px; background: #161616; border: 1px solid #222; font-size: 14px; }
     .radar-list-img { width: 18px; height: 18px; margin-right: 10px; }
@@ -55,7 +49,7 @@
     </div>
 
     <div class="team-label">CASA (A)</div>
-    <div class="radar-container">
+    <div class="radar-container" id="container-casa">
         <button class="radar-button" onclick="add('Meta','A')"><span class="btn-label-text">Meta</span><img src="meta.png" class="radar-icon-img"></button>
         <button class="radar-button" onclick="add('Offside','A')"><span class="btn-label-text">Offside</span><img src="offside.png" class="radar-icon-img"></button>
         <button class="radar-button" onclick="add('Lateral','A')"><span class="btn-label-text">Lateral</span><img src="lateral.png" class="radar-icon-img"></button>
@@ -71,7 +65,7 @@
     </div>
 
     <div class="team-label">FORA (B)</div>
-    <div class="radar-container">
+    <div class="radar-container" id="container-fora">
         <button class="radar-button" onclick="add('Meta','B')"><span class="btn-label-text">Meta</span><img src="meta.png" class="radar-icon-img"></button>
         <button class="radar-button" onclick="add('Offside','B')"><span class="btn-label-text">Offside</span><img src="offside.png" class="radar-icon-img"></button>
         <button class="radar-button" onclick="add('Lateral','B')"><span class="btn-label-text">Lateral</span><img src="lateral.png" class="radar-icon-img"></button>
@@ -101,6 +95,7 @@ const iconesBase = { Meta:'meta.png', Offside:'offside.png', Lateral:'lateral.pn
 
 let gravando = false;
 let recognition;
+let bloqueioComando = false; // TRAVA PARA EVITAR DUPLICIDADE
 
 if ('webkitSpeechRecognition' in window) {
     recognition = new webkitSpeechRecognition();
@@ -109,35 +104,49 @@ if ('webkitSpeechRecognition' in window) {
     recognition.interimResults = true;
 
     recognition.onresult = (event) => {
+        if (bloqueioComando) return; // Se acabou de enviar um comando, ignora o resto do buffer
+
         let texto = "";
         for (let i = event.resultIndex; i < event.results.length; ++i) {
             texto += event.results[i][0].transcript;
         }
-        processarVozRapida(texto.toLowerCase());
+        processarComando(texto.toLowerCase());
     };
 
     recognition.onend = () => { if (gravando) recognition.start(); };
 }
 
-function processarVozRapida(texto) {
-    let time = null;
-    if (texto.match(/\ba\b/)) time = "A";
-    else if (texto.match(/\bb\b/)) time = "B";
-
+function processarComando(texto) {
     const comandos = {
-        "meta": "Meta", "impedimento": "Offside", "lateral": "Lateral", 
-        "canto": "Canto", "escanteio": "Canto", "ataque": "Ataque", 
-        "perigoso": "Perigoso", "falta": "Falta", "gol": "Gol!"
+        "meta": "Meta", "lateral": "Lateral", "canto": "Canto", "escanteio": "Canto",
+        "ataque": "Ataque", "perigoso": "Perigoso", "falta": "Falta", "gol": "Gol!", "pênalti": "Penalti"
     };
 
     for (let chave in comandos) {
-        if (texto.includes(chave) && time) {
-            add(comandos[chave], time);
-            if (navigator.vibrate) navigator.vibrate(100);
-            recognition.stop(); // Limpa o buffer para o próximo comando ser rápido
-            break;
+        if (texto.includes(chave)) {
+            // Identifica o time APÓS o comando (Ex: "Lateral A" ou "Lateral B")
+            let time = null;
+            if (texto.includes(chave + " a") || texto.includes("a " + chave)) time = "A";
+            else if (texto.includes(chave + " b") || texto.includes("b " + chave)) time = "B";
+
+            if (time) {
+                executarComandoVoz(comandos[chave], time);
+                break;
+            }
         }
     }
+}
+
+function executarComandoVoz(evento, time) {
+    bloqueioComando = true; // Ativa a trava
+    add(evento, time);
+    if (navigator.vibrate) navigator.vibrate(100);
+    
+    // Reinicia o reconhecimento para limpar o texto antigo e evitar repetição
+    recognition.stop(); 
+    
+    // Libera a trava após 1.5 segundos
+    setTimeout(() => { bloqueioComando = false; }, 1500);
 }
 
 function toggleVoz() {
@@ -161,7 +170,6 @@ function add(evento, time){
 
 function limparTudo(){ if(confirm("Limpar tudo?")) db.ref('eventos').remove(); }
 function desfazerUltimo(){ db.ref('eventos').orderByChild('timestamp').limitToLast(1).once('value', s => s.forEach(c => c.ref.remove())); }
-function toggleEdicao() { /* Função de edição se necessária */ }
 
 db.ref('eventos').on('value', snap => {
     const list = document.getElementById('eventList');
