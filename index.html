@@ -7,6 +7,21 @@
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.18.0.js"></script>
     
     <style>
+        /* MARCADOR DE VERSÃO PARA CACHE */
+        .version-tag {
+            background: #007bff;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 4px;
+            text-align: center;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             font-family: Arial, sans-serif; 
@@ -26,6 +41,7 @@
             text-align: center;
             width: 90%;
             max-width: 350px;
+            margin-top: 20px;
         }
         h2 { margin-bottom: 20px; color: #007bff; }
         .status { margin-bottom: 20px; font-size: 14px; color: #888; font-weight: bold; }
@@ -49,6 +65,8 @@
 </head>
 <body>
 
+    <div class="version-tag">VERSÃO ATUAL: v2.1 (VOZ ATIVA)</div>
+
     <div class="container">
         <h2>Scout Voice</h2>
         <div id="status" class="status">Pronto para conectar</div>
@@ -60,7 +78,6 @@
     </div>
 
     <script>
-        // CONFIGURAÇÕES
         const options = {
             appId: "9b20225ca2a5400f9a98b7c20a1f994d",
             channel: "sala_scout_pro",
@@ -77,7 +94,6 @@
         const statusText = document.getElementById('status');
         const countText = document.getElementById('count');
 
-        // Atualiza o contador na tela
         function updateCounter() {
             countText.innerText = Object.keys(remoteUsers).length;
         }
@@ -86,15 +102,12 @@
             try {
                 statusText.innerText = "Conectando...";
                 
-                // 1. Entrar no canal
                 options.uid = await client.join(options.appId, options.channel, options.token, null);
                 
-                // 2. Criar trilha de áudio do microfone
                 localTracks.audioTrack = await AgoraRTC.createMicrophoneAudioTrack({
                     encoderConfig: "high_quality" 
                 });
 
-                // 3. Publicar áudio
                 await client.publish(localTracks.audioTrack);
                 
                 statusText.innerText = "CONECTADO - Você está ao vivo";
@@ -102,33 +115,28 @@
                 joinBtn.style.display = "none";
                 leaveBtn.style.display = "block";
 
-                console.log("Entrou na sala com sucesso!");
             } catch (error) {
                 console.error(error);
-                statusText.innerText = "Erro ao conectar. Verifique o App ID ou Microfone.";
+                statusText.innerText = "Erro ao conectar. Verifique permissões.";
                 statusText.style.color = "#dc3545";
             }
         }
 
-        // Evento disparado quando um usuário remoto publica áudio
         client.on("user-published", async (user, mediaType) => {
             await client.subscribe(user, mediaType);
-            
             if (mediaType === "audio") {
                 remoteUsers[user.uid] = user; 
-                user.audioTrack.play(); // Toca o áudio do outro usuário
+                user.audioTrack.play();
                 updateCounter();
             }
         });
 
-        // Evento disparado quando um usuário sai da sala
         client.on("user-left", (user) => {
             delete remoteUsers[user.uid];
             updateCounter();
         });
 
         async function leave() {
-            // Para as trilhas locais (microfone)
             for (let trackName in localTracks) {
                 let track = localTracks[trackName];
                 if (track) {
@@ -137,11 +145,7 @@
                     localTracks[trackName] = null;
                 }
             }
-
-            // Sai do canal
             await client.leave();
-            
-            // Limpa lista de usuários e contador
             remoteUsers = {};
             updateCounter();
             
