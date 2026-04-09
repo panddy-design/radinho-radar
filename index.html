@@ -65,7 +65,7 @@
 </head>
 <body>
 
-    <div class="version-tag">VERSÃO ATUAL: v2.1 (VOZ ATIVA)</div>
+    <div class="version-tag">VERSÃO ATUAL: v2.2 (VOZ ATIVA)</div>
 
     <div class="container">
         <h2>Scout Voice</h2>
@@ -100,25 +100,31 @@
 
         async function join() {
             try {
-                statusText.innerText = "Conectando...";
+                statusText.innerText = "Tentando conectar...";
                 
+                // Entrar no canal
                 options.uid = await client.join(options.appId, options.channel, options.token, null);
                 
+                // Feedback tátil para saber que o clique funcionou
+                if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+
+                // Criar áudio
                 localTracks.audioTrack = await AgoraRTC.createMicrophoneAudioTrack({
                     encoderConfig: "high_quality" 
                 });
 
                 await client.publish(localTracks.audioTrack);
                 
-                statusText.innerText = "CONECTADO - Você está ao vivo";
+                statusText.innerText = "CONECTADO!";
                 statusText.style.color = "#28a745";
                 joinBtn.style.display = "none";
                 leaveBtn.style.display = "block";
 
             } catch (error) {
                 console.error(error);
-                statusText.innerText = "Erro ao conectar. Verifique permissões.";
-                statusText.style.color = "#dc3545";
+                // ALERTA PARA VOCÊ VER NO CELULAR
+                alert("ERRO NO CELULAR: " + error.message);
+                statusText.innerText = "Erro: " + error.code;
             }
         }
 
