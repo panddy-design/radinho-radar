@@ -3,127 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scout Voice v2.4</title>
+    <title>Scout Voice v2.5</title>
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.18.0.js"></script>
     <style>
-        .version-tag { background: #6f42c1; color: #fff; font-size: 10px; font-weight: bold; padding: 4px; text-align: center; width: 100%; position: fixed; top: 0; left: 0; z-index: 1000; }
+        .version-tag { background: #17a2b8; color: #fff; font-size: 10px; font-weight: bold; padding: 4px; text-align: center; width: 100%; position: fixed; top: 0; left: 0; z-index: 1000; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #0b0b0b; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
-        .container { background: #1a1a1a; padding: 30px; border-radius: 25px; text-align: center; width: 90%; max-width: 360px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h2 { margin-bottom: 5px; color: #007bff; font-size: 22px; }
-        #status { margin-bottom: 25px; font-size: 13px; color: #888; font-weight: bold; text-transform: uppercase; }
-        .btn { width: 100%; padding: 18px; margin: 8px 0; border: none; border-radius: 15px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; }
+        body { font-family: sans-serif; background: #0b0b0b; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        .container { background: #1a1a1a; padding: 30px; border-radius: 25px; text-align: center; width: 90%; max-width: 360px; border: 1px solid #333; }
+        h2 { margin-bottom: 5px; color: #007bff; }
+        #status { margin-bottom: 25px; font-size: 13px; color: #888; font-weight: bold; }
+        .btn { width: 100%; padding: 18px; margin: 8px 0; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-scout { background: #007bff; color: white; }
         .btn-ouvinte { background: #28a745; color: white; }
-        .btn-janela { background: #6f42c1; color: white; font-size: 12px; padding: 10px; }
+        .btn-janela { background: #6f42c1; color: white; }
         .btn-sair { background: #333; color: #bbb; margin-top: 20px; }
-        .btn:active { transform: scale(0.97); }
-        .stats { margin-top: 20px; font-size: 12px; color: #444; border-top: 1px solid #222; padding-top: 15px; }
+        .stats { margin-top: 20px; font-size: 12px; color: #444; }
     </style>
 </head>
 <body>
 
-    <div class="version-tag">VERSÃO: v2.4 (MODO JANELA OUVINTE)</div>
+    <div class="version-tag">VERSÃO: v2.5 (FIX JANELA POPUP)</div>
 
     <div class="container">
         <h2>Scout Voice</h2>
-        <div id="status">Aguardando Conexão...</div>
+        <div id="status">Aguardando...</div>
 
         <div id="area-botoes">
             <button class="btn btn-scout" onclick="iniciar('scout')">SOU SCOUT (CELULAR)</button>
-            <button class="btn btn-ouvinte" onclick="iniciar('ouvinte')">OUVIR NESTA ABA (PC)</button>
-            <button class="btn btn-janela" onclick="abrirJanelaOuvinte()">ABRIR EM JANELA SEPARADA</button>
+            <button class="btn btn-ouvinte" onclick="iniciar('ouvinte')">OUVIR NESTA ABA</button>
+            <button class="btn btn-janela" onclick="abrirJanelaOuvinte()">ABRIR JANELA POPUP</button>
         </div>
 
         <button id="btn-sair" class="btn btn-sair" onclick="sair()" style="display:none;">DESCONECTAR</button>
-
-        <div class="stats">
-            Ouvintes ativos: <span id="count" style="color:#007bff">0</span>
-        </div>
+        <div class="stats">Usuários: <span id="count">0</span></div>
     </div>
 
     <script>
         const config = {
             appId: "9b20225ca2a5400f9a98b7c20a1f994d",
-            channel: "sala_scout_pro",
-            token: null
+            channel: "sala_scout_pro"
         };
 
         let client = AgoraRTC.createClient({ mode: "rtc", codec: "opus" });
         let mic = null;
-        let ouvintes = {};
 
-        // Função para iniciar a conexão
         async function iniciar(modo) {
             try {
-                document.getElementById('status').innerText = "Conectando...";
-                await client.join(config.appId, config.channel, config.token, null);
-
+                await client.join(config.appId, config.channel, null, null);
                 if (modo === 'scout') {
                     mic = await AgoraRTC.createMicrophoneAudioTrack({ encoderConfig: "high_quality_stereo" });
                     await client.publish(mic);
-                    document.getElementById('status').innerText = "TRANSMITINDO (SCOUT)";
-                    document.getElementById('status').style.color = "#007bff";
+                    document.getElementById('status').innerText = "TRANSMITINDO...";
                 } else {
-                    document.getElementById('status').innerText = "OUVINDO (TRADER)";
-                    document.getElementById('status').style.color = "#28a745";
+                    document.getElementById('status').innerText = "OUVINDO...";
                 }
-
                 document.getElementById('area-botoes').style.display = 'none';
                 document.getElementById('btn-sair').style.display = 'block';
-
-            } catch (e) {
-                alert("Erro: " + e.message);
-                sair();
-            }
+            } catch (e) { alert("Erro ao conectar: " + e.message); }
         }
 
-        // Função para abrir a janela pop-up (Modo Janela)
         function abrirJanelaOuvinte() {
-            const width = 320;
-            const height = 400;
-            const left = window.screen.width - width - 20;
-            const top = 100;
-
-            const popup = window.open("", "ScoutVoicePopup", `width=${width},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no`);
+            const width = 350;
+            const height = 250;
+            const popup = window.open("", "ScoutVoicePopup", `width=${width},height=${height},menubar=no,status=no`);
             
-            // Escreve o conteúdo da janela pop-up
+            if (!popup || popup.closed || typeof popup.closed == 'undefined') { 
+                alert("POP-UP BLOQUEADO! Por favor, libere os pop-ups no seu navegador para usar o modo janela."); 
+                return; 
+            }
+
             popup.document.write(`
                 <html>
-                <head>
-                    <title>Ouvinte - Scout Voice</title>
+                <body style="background:#000;color:#fff;font-family:sans-serif;text-align:center;padding:20px;">
+                    <h3 style="color:#28a745">OUVINDE ATIVO</h3>
+                    <p style="font-size:12px;color:#555">Mantenha esta janela aberta para ouvir.</p>
+                    <button onclick="window.close()" style="background:#444;color:#fff;border:none;padding:10px;border-radius:5px;cursor:pointer;margin-top:20px;">FECHAR</button>
                     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.18.0.js"><\/script>
-                    <style>
-                        body { background: #0b0b0b; color: white; font-family: sans-serif; text-align: center; display: flex; flex-direction: column; justify-content: center; height: 100vh; margin: 0; }
-                        #status-pop { color: #28a745; font-weight: bold; font-size: 18px; margin-bottom: 20px; }
-                        .info { font-size: 12px; color: #555; }
-                        button { background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin-top: 30px; }
-                    </style>
-                </head>
-                <body>
-                    <div id="status-pop">CONECTANDO...</div>
-                    <div class="info">Canal: sala_scout_pro</div>
-                    <button onclick="window.close()">FECHAR E SAIR</button>
-
                     <script>
-                        const clientPop = AgoraRTC.createClient({ mode: "rtc", codec: "opus" });
-                        
-                        async function iniciarPop() {
-                            await clientPop.join("${config.appId}", "${config.channel}", null, null);
-                            document.getElementById('status-pop').innerText = "OUVINDO AO VIVO";
-                            
-                            clientPop.on("user-published", async (user, mediaType) => {
-                                await clientPop.subscribe(user, mediaType);
-                                if (mediaType === "audio") { user.audioTrack.play(); }
+                        const c = AgoraRTC.createClient({ mode: "rtc", codec: "opus" });
+                        c.join("${config.appId}", "${config.channel}", null, null).then(() => {
+                            c.on("user-published", async (u, mt) => {
+                                await c.subscribe(u, mt);
+                                if (mt === "audio") u.audioTrack.play();
                             });
-                        }
-
-                        iniciarPop().catch(e => {
-                            document.getElementById('status-pop').innerText = "ERRO AO CONECTAR";
-                            document.getElementById('status-pop').style.color = "red";
                         });
-
-                        window.onbeforeunload = () => { clientPop.leave(); };
+                        window.onbeforeunload = () => { c.leave(); };
                     <\/script>
                 </body>
                 </html>
@@ -132,20 +96,11 @@
 
         client.on("user-published", async (user, mediaType) => {
             await client.subscribe(user, mediaType);
-            if (mediaType === "audio") {
-                user.audioTrack.play();
-                ouvintes[user.uid] = user;
-                document.getElementById('count').innerText = Object.keys(ouvintes).length;
-            }
-        });
-
-        client.on("user-left", (user) => {
-            delete ouvintes[user.uid];
-            document.getElementById('count').innerText = Object.keys(ouvintes).length;
+            if (mediaType === "audio") user.audioTrack.play();
         });
 
         async function sair() {
-            if (mic) { mic.stop(); mic.close(); mic = null; }
+            if (mic) { mic.stop(); mic.close(); }
             await client.leave();
             location.reload(); 
         }
