@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scout Voice - Sala de Áudio</title>
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.18.0.js"></script>
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #0b0b0b; 
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh;
+        }
+        .container {
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 90%;
+            max-width: 350px;
+        }
+        h2 { margin-bottom: 20px; color: #007bff; }
+        .status { margin-bottom: 20px; font-size: 14px; color: #888; }
+        .btn {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .join-btn { background: #28a745; color: white; }
+        .join-btn:active { transform: scale(0.98); }
+        .leave-btn { background: #dc3545; color: white; }
+        #user-list { margin-top: 20px; font-size: 12px; text-align: left; border-top: 1px solid #333; padding-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Scout Voice</h2>
+        <div id="status" class="status">Pronto para conectar</div>
+
+        <button id="join" class="btn join-btn">ENTRAR NA SALA</button>
+        <button id="leave" class="btn leave-btn" style="display:none;">SAIR DA SALA</button>
+
+        <div id="user-list">Ouvintes na sala: <span id="count">0</span></div>
+    </div>
+
+    <script>
+        // CONFIGURAÇÕES
+        const options = {
+            appId: "36dd883cd4c5431d83b2b490e15e12fc", // Insira seu App ID da Agora.io
+            channel: "sala_scout_pro",
+            token: null, // Deixe null se a segurança for "Testing Mode" no painel da Agora
+            uid: null
+        };
+
+        let client = AgoraRTC.createClient({ mode: "rtc", codec: "opus" });
+        let localTracks = { audioTrack: null };
+        let remoteUsers = {};
+
+        // Botões
+        const joinBtn = document.getElementById('join');
+        const leaveBtn = document.getElementById('leave');
+        const statusText = document.getElementById('status');
+        const countText = document.getElementById('count');
+
+        async function join() {
+            try {
+                // Entrar no canal
+                options.uid = await client.join(options.appId, options.channel, options.token, null);
+                
+                // Criar trilha de áudio do seu microfone
+                localTracks.audioTrack = await AgoraRTC.createMicrophoneAudioTrack({
+                    encoderConfig: "high_quality" // Prioriza clareza e baixa latência
+                });
+
+                // Publicar seu áudio para os outros ouvirem
+                await client.publish(localTracks.audioTrack);
+                
+                statusText.innerText = "CONECTADO - Você está ao vivo";
+                statusText.style.color = "#28a745";
+                joinBtn.style.display = "none";
+                leaveBtn.style.display = "block";
+
+                console.log("Publicado com sucesso!");
+            } catch (error) {
+                console.error(error);
+                statusText.innerText = "Erro ao conectar. Verifique o App ID.";
+            }
+        }
+
+        // Lógica para ouvir os outros usuários
+        client.on("user-published", async (user, mediaType) => {
+            await client.subscribe(user, mediaType);
+            if (mediaType === "audio") {
+                user.audioTrack.play();
+                remoteUsers[user.uid] = user;
+                countText.innerText = Object.keys(remoteUsers).length;
+            }
+        });
+
+        client.on("user-unpublished", (user) => {
+            delete remoteUsers[user.uid];
+            countText.innerText = Object.keys(remoteUsers).length;
+        });
+
+        async function leave() {
+            for (let trackName in localTracks) {
+                let track = localTracks[trackName];
+                if (track) {
+                    track.stop();
+                    track.close();
+                    localTracks[trackName] = null;
+                }
+            }
+            await client.leave();
+            remoteUsers = {};
+            countText.innerText = "0";
+            statusText.innerText = "Desconectado";
+            statusText.style.color = "#888";
+            joinBtn.style.display = "block";
+            leaveBtn.style.display = "none";
+        }
+
+        joinBtn.onclick = join;
+        leaveBtn.onclick = leave;
+    </script>
+</body>
+</html>
