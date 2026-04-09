@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scout Voice v2.5</title>
+    <title>Scout Voice v2.6</title>
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.18.0.js"></script>
     <style>
-        .version-tag { background: #17a2b8; color: #fff; font-size: 10px; font-weight: bold; padding: 4px; text-align: center; width: 100%; position: fixed; top: 0; left: 0; z-index: 1000; }
+        .version-tag { background: #ff5722; color: #fff; font-size: 10px; font-weight: bold; padding: 4px; text-align: center; width: 100%; position: fixed; top: 0; left: 0; z-index: 1000; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: sans-serif; background: #0b0b0b; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
         .container { background: #1a1a1a; padding: 30px; border-radius: 25px; text-align: center; width: 90%; max-width: 360px; border: 1px solid #333; }
@@ -22,7 +22,7 @@
 </head>
 <body>
 
-    <div class="version-tag">VERSÃO: v2.5 (FIX JANELA POPUP)</div>
+    <div class="version-tag">VERSÃO: v2.6 (FIX INITIALIZATION)</div>
 
     <div class="container">
         <h2>Scout Voice</h2>
@@ -35,31 +35,38 @@
         </div>
 
         <button id="btn-sair" class="btn btn-sair" onclick="sair()" style="display:none;">DESCONECTAR</button>
-        <div class="stats">Usuários: <span id="count">0</span></div>
+        <div class="stats">Usuários ativos: <span id="count">0</span></div>
     </div>
 
     <script>
-        const config = {
+        // Declarando no topo para evitar erro de inicialização
+        var config = {
             appId: "9b20225ca2a5400f9a98b7c20a1f994d",
             channel: "sala_scout_pro"
         };
-
-        let client = AgoraRTC.createClient({ mode: "rtc", codec: "opus" });
-        let mic = null;
+        var client = AgoraRTC.createClient({ mode: "rtc", codec: "opus" });
+        var mic = null;
+        var remoteUsers = {};
 
         async function iniciar(modo) {
             try {
                 await client.join(config.appId, config.channel, null, null);
+                
                 if (modo === 'scout') {
                     mic = await AgoraRTC.createMicrophoneAudioTrack({ encoderConfig: "high_quality_stereo" });
                     await client.publish(mic);
                     document.getElementById('status').innerText = "TRANSMITINDO...";
+                    document.getElementById('status').style.color = "#007bff";
                 } else {
                     document.getElementById('status').innerText = "OUVINDO...";
+                    document.getElementById('status').style.color = "#28a745";
                 }
+                
                 document.getElementById('area-botoes').style.display = 'none';
                 document.getElementById('btn-sair').style.display = 'block';
-            } catch (e) { alert("Erro ao conectar: " + e.message); }
+            } catch (e) { 
+                alert("Erro ao conectar: " + e.message); 
+            }
         }
 
         function abrirJanelaOuvinte() {
@@ -67,17 +74,16 @@
             const height = 250;
             const popup = window.open("", "ScoutVoicePopup", `width=${width},height=${height},menubar=no,status=no`);
             
-            if (!popup || popup.closed || typeof popup.closed == 'undefined') { 
-                alert("POP-UP BLOQUEADO! Por favor, libere os pop-ups no seu navegador para usar o modo janela."); 
+            if (!popup) { 
+                alert("POP-UP BLOQUEADO!"); 
                 return; 
             }
 
             popup.document.write(`
                 <html>
                 <body style="background:#000;color:#fff;font-family:sans-serif;text-align:center;padding:20px;">
-                    <h3 style="color:#28a745">OUVINDE ATIVO</h3>
-                    <p style="font-size:12px;color:#555">Mantenha esta janela aberta para ouvir.</p>
-                    <button onclick="window.close()" style="background:#444;color:#fff;border:none;padding:10px;border-radius:5px;cursor:pointer;margin-top:20px;">FECHAR</button>
+                    <h3 style="color:#28a745">OUVINTE ATIVO</h3>
+                    <p style="font-size:12px;color:#555">Janela independente</p>
                     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.18.0.js"><\/script>
                     <script>
                         const c = AgoraRTC.createClient({ mode: "rtc", codec: "opus" });
@@ -87,16 +93,25 @@
                                 if (mt === "audio") u.audioTrack.play();
                             });
                         });
-                        window.onbeforeunload = () => { c.leave(); };
                     <\/script>
                 </body>
                 </html>
             `);
         }
 
+        // Ouvir outros usuários
         client.on("user-published", async (user, mediaType) => {
             await client.subscribe(user, mediaType);
-            if (mediaType === "audio") user.audioTrack.play();
+            if (mediaType === "audio") {
+                user.audioTrack.play();
+                remoteUsers[user.uid] = user;
+                document.getElementById('count').innerText = Object.keys(remoteUsers).length;
+            }
+        });
+
+        client.on("user-left", (user) => {
+            delete remoteUsers[user.uid];
+            document.getElementById('count').innerText = Object.keys(remoteUsers).length;
         });
 
         async function sair() {
