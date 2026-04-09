@@ -28,7 +28,7 @@
             max-width: 350px;
         }
         h2 { margin-bottom: 20px; color: #007bff; }
-        .status { margin-bottom: 20px; font-size: 14px; color: #888; }
+        .status { margin-bottom: 20px; font-size: 14px; color: #888; font-weight: bold; }
         .btn {
             width: 100%;
             padding: 15px;
@@ -43,7 +43,8 @@
         .join-btn { background: #28a745; color: white; }
         .join-btn:active { transform: scale(0.98); }
         .leave-btn { background: #dc3545; color: white; }
-        #user-list { margin-top: 20px; font-size: 12px; text-align: left; border-top: 1px solid #333; padding-top: 10px; }
+        #user-list { margin-top: 20px; font-size: 12px; text-align: left; border-top: 1px solid #333; padding-top: 10px; color: #aaa; }
+        #count { color: #007bff; font-weight: bold; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -61,33 +62,39 @@
     <script>
         // CONFIGURAÇÕES
         const options = {
-            appId: "9b20225ca2a5400f9a98b7c20a1f994d", // Insira seu App ID da Agora.io
+            appId: "9b20225ca2a5400f9a98b7c20a1f994d",
             channel: "sala_scout_pro",
-            token: null, // Deixe null se a segurança for "Testing Mode" no painel da Agora
+            token: null, 
             uid: null
         };
 
         let client = AgoraRTC.createClient({ mode: "rtc", codec: "opus" });
         let localTracks = { audioTrack: null };
-        let remoteUsers = {};
+        let remoteUsers = {}; 
 
-        // Botões
         const joinBtn = document.getElementById('join');
         const leaveBtn = document.getElementById('leave');
         const statusText = document.getElementById('status');
         const countText = document.getElementById('count');
 
+        // Atualiza o contador na tela
+        function updateCounter() {
+            countText.innerText = Object.keys(remoteUsers).length;
+        }
+
         async function join() {
             try {
-                // Entrar no canal
+                statusText.innerText = "Conectando...";
+                
+                // 1. Entrar no canal
                 options.uid = await client.join(options.appId, options.channel, options.token, null);
                 
-                // Criar trilha de áudio do seu microfone
+                // 2. Criar trilha de áudio do microfone
                 localTracks.audioTrack = await AgoraRTC.createMicrophoneAudioTrack({
-                    encoderConfig: "high_quality" // Prioriza clareza e baixa latência
+                    encoderConfig: "high_quality" 
                 });
 
-                // Publicar seu áudio para os outros ouvirem
+                // 3. Publicar áudio
                 await client.publish(localTracks.audioTrack);
                 
                 statusText.innerText = "CONECTADO - Você está ao vivo";
@@ -95,29 +102,33 @@
                 joinBtn.style.display = "none";
                 leaveBtn.style.display = "block";
 
-                console.log("Publicado com sucesso!");
+                console.log("Entrou na sala com sucesso!");
             } catch (error) {
                 console.error(error);
-                statusText.innerText = "Erro ao conectar. Verifique o App ID.";
+                statusText.innerText = "Erro ao conectar. Verifique o App ID ou Microfone.";
+                statusText.style.color = "#dc3545";
             }
         }
 
-        // Lógica para ouvir os outros usuários
+        // Evento disparado quando um usuário remoto publica áudio
         client.on("user-published", async (user, mediaType) => {
             await client.subscribe(user, mediaType);
+            
             if (mediaType === "audio") {
-                user.audioTrack.play();
-                remoteUsers[user.uid] = user;
-                countText.innerText = Object.keys(remoteUsers).length;
+                remoteUsers[user.uid] = user; 
+                user.audioTrack.play(); // Toca o áudio do outro usuário
+                updateCounter();
             }
         });
 
-        client.on("user-unpublished", (user) => {
+        // Evento disparado quando um usuário sai da sala
+        client.on("user-left", (user) => {
             delete remoteUsers[user.uid];
-            countText.innerText = Object.keys(remoteUsers).length;
+            updateCounter();
         });
 
         async function leave() {
+            // Para as trilhas locais (microfone)
             for (let trackName in localTracks) {
                 let track = localTracks[trackName];
                 if (track) {
@@ -126,9 +137,14 @@
                     localTracks[trackName] = null;
                 }
             }
+
+            // Sai do canal
             await client.leave();
+            
+            // Limpa lista de usuários e contador
             remoteUsers = {};
-            countText.innerText = "0";
+            updateCounter();
+            
             statusText.innerText = "Desconectado";
             statusText.style.color = "#888";
             joinBtn.style.display = "block";
