@@ -1,288 +1,142 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0b0b0b">
-
-<title>Radinho Radar Pro</title>
-
-<style>
-    * { 
-        box-sizing: border-box; 
-        -webkit-tap-highlight-color: transparent; 
-        margin: 0; padding: 0; 
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scout Voice - Sala de Áudio</title>
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.18.0.js"></script>
     
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #0b0b0b;
-        color: #fff;
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        overflow-x: hidden;
-        width: 100%;
-        /* Evita puxar para atualizar no Chrome */
-        overscroll-behavior-y: contain; 
-    }
-
-    .app-container {
-        width: 100%;
-        max-width: 380px; 
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .header-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr auto;
-        gap: 8px;
-        align-items: center;
-        width: 100%;
-    }
-
-    input {
-        padding: 8px;
-        border-radius: 5px;
-        border: 1px solid #444;
-        background: #222;
-        color: #fff;
-        text-align: center;
-        font-size: 14px;
-        width: 100%;
-    }
-
-    .btn-config {
-        background: none;
-        border: none;
-        font-size: 24px;
-        cursor: pointer;
-        color: #fff;
-        display: flex;
-        align-items: center;
-    }
-
-    /* CONTROLES ARREDONDADOS */
-    .controls {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 5px;
-        width: 100%;
-    }
-    .control-btn {
-        padding: 8px 2px;
-        border-radius: 15px;
-        font-size: 11px;
-        background: #1a1a1a;
-        border: 1px solid #444;
-        color: #fff;
-        cursor: pointer;
-        font-weight: bold;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 55px;
-    }
-    .control-icon-img {
-        width: 20px;
-        height: 20px;
-        object-fit: contain;
-        margin-bottom: 3px;
-    }
-
-    .team-label {
-        background-color: #007bff;
-        color: #fff;
-        padding: 5px;
-        text-align: center;
-        font-weight: bold;
-        border-radius: 4px;
-        font-size: 14px;
-        width: 100%;
-        text-transform: uppercase;
-    }
-
-    /* RADAR: TEXTO NO TOPO E ÍCONE CENTRAL */
-    .radar-container {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
-        width: 100%;
-    }
-    .radar-button {
-        position: relative;
-        padding-top: 18px; 
-        border-radius: 12px;
-        background: #1a1a1a;
-        border: 1px solid #333;
-        color: #fff;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 65px; 
-        cursor: pointer;
-        width: 100%;
-    }
-
-    .radar-icon-img {
-        width: 24px; /* 10% maior */
-        height: 24px;
-        object-fit: contain;
-    }
-
-    .btn-label-text {
-        position: absolute;
-        top: 6px;
-        font-size: 10px;
-        font-weight: bold;
-        text-transform: uppercase;
-        color: #bbb;
-        pointer-events: none;
-    }
-
-    .radar-button.editando { border: 2px dashed #007bff !important; }
-
-    .event-list { width: 100%; margin-top: 10px; }
-    .event-card {
-        display: flex;
-        align-items: center;
-        padding: 10px;
-        margin-bottom: 6px;
-        border-radius: 8px;
-        background: #161616;
-        border: 1px solid #222;
-        font-size: 14px;
-    }
-    .radar-list-img { width: 18px; height: 18px; margin-right: 10px; }
-</style>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #0b0b0b; 
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh;
+        }
+        .container {
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 90%;
+            max-width: 350px;
+        }
+        h2 { margin-bottom: 20px; color: #007bff; }
+        .status { margin-bottom: 20px; font-size: 14px; color: #888; }
+        .btn {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .join-btn { background: #28a745; color: white; }
+        .join-btn:active { transform: scale(0.98); }
+        .leave-btn { background: #dc3545; color: white; }
+        #user-list { margin-top: 20px; font-size: 12px; text-align: left; border-top: 1px solid #333; padding-top: 10px; }
+    </style>
 </head>
 <body>
 
-<div class="app-container">
-    <div class="header-row">
-        <input id="teamA" value="Casa">
-        <input id="teamB" value="Fora">
-        <button class="btn-config" onclick="toggleEdicao()">⚙️</button>
+    <div class="container">
+        <h2>Scout Voice</h2>
+        <div id="status" class="status">Pronto para conectar</div>
+
+        <button id="join" class="btn join-btn">ENTRAR NA SALA</button>
+        <button id="leave" class="btn leave-btn" style="display:none;">SAIR DA SALA</button>
+
+        <div id="user-list">Ouvintes na sala: <span id="count">0</span></div>
     </div>
 
-    <div class="controls">
-        <button class="control-btn" onclick="limparTudo()"><img src="limpar.png" class="control-icon-img">Limpar</button>
-        <button class="control-btn" onclick="desfazerUltimo()"><img src="desfazer.png" class="control-icon-img">Desfazer</button>
-        <button class="control-btn" onclick="abrirJanela()"><img src="radar.png" class="control-icon-img">Radar</button>
-        <button class="control-btn" onclick="addTempo()"><img src="tempo.png" class="control-icon-img">Tempo</button>
-        <button class="control-btn" onclick="addSub()"><img src="sub.png" class="control-icon-img">Sub</button>
-    </div>
+    <script>
+        // CONFIGURAÇÕES
+        const options = {
+            appId: "36dd883cd4c5431d83b2b490e15e12fc", // Insira seu App ID da Agora.io
+            channel: "sala_scout_pro",
+            token: null, // Deixe null se a segurança for "Testing Mode" no painel da Agora
+            uid: null
+        };
 
-    <div class="team-label">CASA</div>
-    <div class="radar-container" id="container-casa">
-        <button class="radar-button" onclick="add('Meta','A')"><span class="btn-label-text">Meta</span><img src="meta.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Offside','A')"><span class="btn-label-text">Offside</span><img src="offside.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Lateral','A')"><span class="btn-label-text">Lateral</span><img src="lateral.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Canto','A')"><span class="btn-label-text">Canto</span><img src="canto.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Goleiro','A')"><span class="btn-label-text">Goleiro</span><img src="goleiro.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Defesa','A')"><span class="btn-label-text">Defesa</span><img src="defesa-casa.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Ataque','A')"><span class="btn-label-text">Ataque</span><img src="ataque-casa.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Perigoso','A')"><span class="btn-label-text">Perigoso</span><img src="perigoso-casa.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Parado','A')"><span class="btn-label-text">Parado</span><img src="parado.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Falta','A')"><span class="btn-label-text">Falta</span><img src="falta.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Penalti','A')"><span class="btn-label-text">Penalti</span><img src="penal.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Gol!','A')"><span class="btn-label-text">Gol!</span><img src="bola.png" class="radar-icon-img"></button>
-    </div>
+        let client = AgoraRTC.createClient({ mode: "rtc", codec: "opus" });
+        let localTracks = { audioTrack: null };
+        let remoteUsers = {};
 
-    <div class="team-label">FORA</div>
-    <div class="radar-container" id="container-fora">
-        <button class="radar-button" onclick="add('Meta','B')"><span class="btn-label-text">Meta</span><img src="meta.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Offside','B')"><span class="btn-label-text">Offside</span><img src="offside.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Lateral','B')"><span class="btn-label-text">Lateral</span><img src="lateral.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Canto','B')"><span class="btn-label-text">Canto</span><img src="canto.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Goleiro','B')"><span class="btn-label-text">Goleiro</span><img src="goleiro.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Defesa','B')"><span class="btn-label-text">Defesa</span><img src="defesa-fora.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Ataque','B')"><span class="btn-label-text">Ataque</span><img src="ataque-fora.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Perigoso','B')"><span class="btn-label-text">Perigoso</span><img src="perigoso-fora.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Parado','B')"><span class="btn-label-text">Parado</span><img src="parado.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Falta','B')"><span class="btn-label-text">Falta</span><img src="falta.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Penalti','B')"><span class="btn-label-text">Penalti</span><img src="penal.png" class="radar-icon-img"></button>
-        <button class="radar-button" onclick="add('Gol!','B')"><span class="btn-label-text">Gol!</span><img src="bola.png" class="radar-icon-img"></button>
-    </div>
+        // Botões
+        const joinBtn = document.getElementById('join');
+        const leaveBtn = document.getElementById('leave');
+        const statusText = document.getElementById('status');
+        const countText = document.getElementById('count');
 
-    <div id="eventList" class="event-list"></div>
-</div>
+        async function join() {
+            try {
+                // Entrar no canal
+                options.uid = await client.join(options.appId, options.channel, options.token, null);
+                
+                // Criar trilha de áudio do seu microfone
+                localTracks.audioTrack = await AgoraRTC.createMicrophoneAudioTrack({
+                    encoderConfig: "high_quality" // Prioriza clareza e baixa latência
+                });
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+                // Publicar seu áudio para os outros ouvirem
+                await client.publish(localTracks.audioTrack);
+                
+                statusText.innerText = "CONECTADO - Você está ao vivo";
+                statusText.style.color = "#28a745";
+                joinBtn.style.display = "none";
+                leaveBtn.style.display = "block";
 
-<script>
-const firebaseConfig = { apiKey: "AIzaSyCz6YUc4GHbAHu5neKFUXOy2geO8gICUXo", authDomain: "radin-radar.firebaseapp.com", databaseURL: "https://radin-radar-default-rtdb.firebaseio.com", projectId: "radin-radar" };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-const iconesBase = { Meta:'meta.png', Offside:'offside.png', Lateral:'lateral.png', Canto:'canto.png', Goleiro:'goleiro.png', Parado:'parado.png', Falta:'falta.png', Penalti:'penal.png', 'Gol!':'bola.png', Tempo:'tempo.png', Substituição: 'sub.png' };
-
-let editMode = false;
-let janelaRadar = null;
-
-function toggleEdicao() {
-    editMode = !editMode;
-    document.querySelectorAll('.radar-button').forEach(btn => btn.classList.toggle('editando', editMode));
-}
-
-function add(evento, time){
-    if(editMode) return;
-    const team = time === 'A' ? document.getElementById('teamA').value : document.getElementById('teamB').value;
-    const ref = db.ref('eventos');
-    if(evento !== 'Parado'){
-        ref.orderByChild('teamType').equalTo(time).once('value', snap => {
-            snap.forEach(c => { if(c.val().evento === 'Parado') c.ref.remove(); });
-            ref.push({ evento, team, teamType: time, timestamp: Date.now() });
-        });
-    } else { ref.push({ evento, team, teamType: time, timestamp: Date.now() }); }
-}
-
-function addTempo() { db.ref('eventos').push({ evento: 'Tempo', team: '', teamType: '', timestamp: Date.now() }); }
-function addSub() { db.ref('eventos').push({ evento: 'Substituição', team: '', teamType: '', timestamp: Date.now() }); }
-
-db.ref('eventos').on('value', snap => {
-    const list = document.getElementById('eventList');
-    list.innerHTML = '';
-    const data = snap.val();
-    if (data) {
-        for (let k in data){
-            const e = data[k];
-            const div = document.createElement('div');
-            div.className = 'event-card';
-            let img = iconesBase[e.evento];
-            if(['Defesa', 'Ataque', 'Perigoso'].includes(e.evento)) img = e.evento.toLowerCase() + (e.teamType === 'A' ? '-casa.png' : '-fora.png');
-            div.innerHTML = `<img src="${img}" class="radar-list-img"> ${ (e.evento==='Tempo'||e.evento==='Substituição') ? e.evento : e.evento+' '+e.team }`;
-            list.prepend(div);
+                console.log("Publicado com sucesso!");
+            } catch (error) {
+                console.error(error);
+                statusText.innerText = "Erro ao conectar. Verifique o App ID.";
+            }
         }
-    }
-    if(janelaRadar && !janelaRadar.closed) atualizarJanelaExterna();
-});
 
-function abrirJanela(){
-    if(!janelaRadar || janelaRadar.closed){
-        janelaRadar = window.open("", "RadarWindow", "width=350,height=600");
-        janelaRadar.document.write(`<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html, body { background: #000; color: #fff; font-family: sans-serif; padding: 10px; margin: 0; overflow: hidden; height: 100%; } #lista-externa { height: 100%; overflow-y: scroll; scrollbar-width: none; } #lista-externa::-webkit-scrollbar { display: none; } .event-card { display: flex; align-items: center; padding: 12px; margin-bottom: 5px; border-radius: 8px; background: #111; border: 1px solid #333; font-size: 14px; } .radar-list-img { width: 18px; height: 18px; margin-right: 10px; }</style></head><body><div id="lista-externa"></div></body></html>`);
-        janelaRadar.document.close();
-    }
-    setTimeout(atualizarJanelaExterna, 500);
-}
+        // Lógica para ouvir os outros usuários
+        client.on("user-published", async (user, mediaType) => {
+            await client.subscribe(user, mediaType);
+            if (mediaType === "audio") {
+                user.audioTrack.play();
+                remoteUsers[user.uid] = user;
+                countText.innerText = Object.keys(remoteUsers).length;
+            }
+        });
 
-function atualizarJanelaExterna(){
-    if(janelaRadar && !janelaRadar.closed) janelaRadar.document.getElementById('lista-externa').innerHTML = document.getElementById('eventList').innerHTML;
-}
+        client.on("user-unpublished", (user) => {
+            delete remoteUsers[user.uid];
+            countText.innerText = Object.keys(remoteUsers).length;
+        });
 
-function limparTudo(){ db.ref('eventos').remove(); }
-function desfazerUltimo(){ db.ref('eventos').orderByChild('timestamp').limitToLast(1).once('value', s => s.forEach(c => c.ref.remove())); }
-</script>
+        async function leave() {
+            for (let trackName in localTracks) {
+                let track = localTracks[trackName];
+                if (track) {
+                    track.stop();
+                    track.close();
+                    localTracks[trackName] = null;
+                }
+            }
+            await client.leave();
+            remoteUsers = {};
+            countText.innerText = "0";
+            statusText.innerText = "Desconectado";
+            statusText.style.color = "#888";
+            joinBtn.style.display = "block";
+            leaveBtn.style.display = "none";
+        }
 
+        joinBtn.onclick = join;
+        leaveBtn.onclick = leave;
+    </script>
 </body>
 </html>
