@@ -2,88 +2,60 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scout Voice v2.8</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scout Voice v2.9</title>
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.18.0.js"></script>
     <style>
-        .version-tag { background: #28a745; color: #fff; font-size: 10px; font-weight: bold; padding: 4px; text-align: center; width: 100%; position: fixed; top: 0; left: 0; z-index: 1000; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: sans-serif; background: #0b0b0b; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
-        .container { background: #1a1a1a; padding: 30px; border-radius: 25px; text-align: center; width: 90%; max-width: 360px; border: 1px solid #333; }
-        h2 { margin-bottom: 5px; color: #007bff; }
-        #status { margin-bottom: 25px; font-size: 14px; color: #ffc107; font-weight: bold; }
-        .btn { width: 100%; padding: 18px; margin: 8px 0; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; }
-        .btn-scout { background: #007bff; color: white; }
-        .btn-ouvinte { background: #28a745; color: white; }
-        .btn-sair { background: #333; color: #bbb; margin-top: 20px; }
+        body { font-family: sans-serif; background: #000; color: #fff; text-align: center; padding: 50px; }
+        .btn { padding: 20px; width: 100%; max-width: 300px; margin: 10px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
+        .scout { background: #007bff; color: #fff; }
+        .ouvinte { background: #28a745; color: #fff; }
+        #log { font-size: 12px; color: #555; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-    <div class="version-tag">VERSÃO: v2.8 (AUDIO FIX)</div>
+    <h2>Scout Voice v2.9</h2>
+    <p id="status">Status: Aguardando clique...</p>
 
-    <div class="container">
-        <h2>Scout Voice</h2>
-        <div id="status">SISTEMA PRONTO</div>
+    <button class="btn scout" onclick="rodar('host')">INICIAR COMO SCOUT</button>
+    <button class="btn ouvinte" onclick="rodar('audience')">INICIAR COMO OUVINTE</button>
 
-        <div id="area-botoes">
-            <button class="btn btn-scout" onclick="iniciar('host')">MODO SCOUT (FALAR)</button>
-            <button class="btn btn-ouvinte" onclick="iniciar('audience')">MODO OUVINTE (OUVIR)</button>
-        </div>
-
-        <button id="btn-sair" class="btn btn-sair" onclick="sair()" style="display:none;">DESCONECTAR</button>
-    </div>
+    <div id="log">Logs de conexão aparecerão aqui...</div>
 
     <script>
-        var config = {
-            appId: "9b20225ca2a5400f9a98b7c20a1f994d",
-            channel: "sala_scout_pro"
-        };
-        
-        var client = null;
-        var mic = null;
+        const appID = "9b20225ca2a5400f9a98b7c20a1f994d";
+        const canal = "sala_scout_pro";
+        let client = AgoraRTC.createClient({ mode: "live", codec: "opus" });
 
-        async function iniciar(role) {
+        async function rodar(role) {
             try {
-                // Criar cliente com a função (role) específica
-                client = AgoraRTC.createClient({ mode: "live", codec: "opus" });
+                document.getElementById('status').innerText = "Status: Conectando...";
                 await client.setClientRole(role);
                 
-                document.getElementById('status').innerText = "CONECTANDO...";
-                await client.join(config.appId, config.channel, null, null);
-                
-                if (role === 'host') {
-                    mic = await AgoraRTC.createMicrophoneAudioTrack({ encoderConfig: "high_quality_stereo" });
-                    await client.publish(mic);
-                    document.getElementById('status').innerText = "TRANSMITINDO AO VIVO";
-                    document.getElementById('status').style.color = "#007bff";
-                } else {
-                    document.getElementById('status').innerText = "OUVINDO AGORA";
-                    document.getElementById('status').style.color = "#28a745";
-                }
-                
-                document.getElementById('area-botoes').style.display = 'none';
-                document.getElementById('btn-sair').style.display = 'block';
+                // Tenta entrar na sala
+                await client.join(appID, canal, null, null);
+                document.getElementById('status').innerText = "Status: CONECTADO (" + role + ")";
 
-                // Lógica para ouvir (importante para o PC)
+                if (role === 'host') {
+                    const mic = await AgoraRTC.createMicrophoneAudioTrack();
+                    await client.publish(mic);
+                    document.getElementById('status').innerText = "Status: TRANSMITINDO AO VIVO!";
+                }
+
                 client.on("user-published", async (user, mediaType) => {
                     await client.subscribe(user, mediaType);
                     if (mediaType === "audio") {
-                        // Forçar o áudio a tocar mesmo com bloqueio de autoplay
                         user.audioTrack.play();
-                        document.getElementById('status').innerText = "ÁUDIO RECEBIDO!";
+                        document.getElementById('status').innerText = "Status: OUVINDO ÁUDIO...";
                     }
                 });
 
-            } catch (e) { 
-                alert("Erro: " + e.message); 
+            } catch (err) {
+                document.getElementById('status').innerText = "ERRO FATAL";
+                document.getElementById('log').innerText = "Erro: " + err.message + " | Causa: " + err.code;
+                alert("ERRO: " + err.message);
             }
-        }
-
-        async function sair() {
-            if (mic) { mic.stop(); mic.close(); }
-            if (client) await client.leave();
-            location.reload(); 
         }
     </script>
 </body>
