@@ -3,58 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scout Voice v2.9</title>
+    <title>Scout Voice v3.0</title>
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.18.0.js"></script>
     <style>
-        body { font-family: sans-serif; background: #000; color: #fff; text-align: center; padding: 50px; }
-        .btn { padding: 20px; width: 100%; max-width: 300px; margin: 10px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-        .scout { background: #007bff; color: #fff; }
-        .ouvinte { background: #28a745; color: #fff; }
-        #log { font-size: 12px; color: #555; margin-top: 20px; }
+        body { font-family: sans-serif; background: #0b0b0b; color: #fff; text-align: center; padding: 40px 20px; }
+        .container { background: #1a1a1a; padding: 30px; border-radius: 20px; border: 1px solid #333; max-width: 350px; margin: auto; }
+        .btn { width: 100%; padding: 18px; margin: 10px 0; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .scout { background: #007bff; color: white; }
+        .ouvinte { background: #28a745; color: white; }
+        #status { margin-top: 20px; color: #ffc107; font-weight: bold; }
+        .version { font-size: 10px; color: #444; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-    <h2>Scout Voice v2.9</h2>
-    <p id="status">Status: Aguardando clique...</p>
+    <div class="container">
+        <h2>Scout Voice</h2>
+        <div id="status">SISTEMA PRONTO</div>
 
-    <button class="btn scout" onclick="rodar('host')">INICIAR COMO SCOUT</button>
-    <button class="btn ouvinte" onclick="rodar('audience')">INICIAR COMO OUVINTE</button>
+        <button class="btn scout" onclick="conectar('host')">SOU SCOUT (FALAR)</button>
+        <button class="btn ouvinte" onclick="conectar('audience')">SOU OUVINTE (OUVIR)</button>
+        
+        <button id="sair" class="btn" style="background:#333; color:#888; display:none;" onclick="location.reload()">SAIR / RESET</button>
+    </div>
 
-    <div id="log">Logs de conexão aparecerão aqui...</div>
+    <div class="version">VERSÃO v3.0 - STABLE</div>
 
     <script>
-        const appID = "9b20225ca2a5400f9a98b7c20a1f994d";
-        const canal = "sala_scout_pro";
-        let client = AgoraRTC.createClient({ mode: "live", codec: "opus" });
+        // Configurações Globais
+        var appId = "9b20225ca2a5400f9a98b7c20a1f994d";
+        var canal = "sala_scout_pro";
+        var rtcClient = null;
+        var localMic = null;
 
-        async function rodar(role) {
+        // Inicializa o cliente assim que a página carrega
+        window.onload = function() {
             try {
-                document.getElementById('status').innerText = "Status: Conectando...";
-                await client.setClientRole(role);
-                
-                // Tenta entrar na sala
-                await client.join(appID, canal, null, null);
-                document.getElementById('status').innerText = "Status: CONECTADO (" + role + ")";
+                rtcClient = AgoraRTC.createClient({ mode: "live", codec: "opus" });
+                console.log("Sistema de áudio inicializado.");
+            } catch (e) {
+                console.error("Erro ao carregar SDK:", e);
+            }
+        };
 
-                if (role === 'host') {
-                    const mic = await AgoraRTC.createMicrophoneAudioTrack();
-                    await client.publish(mic);
-                    document.getElementById('status').innerText = "Status: TRANSMITINDO AO VIVO!";
+        async function conectar(papel) {
+            if (!rtcClient) {
+                alert("O sistema ainda está carregando, aguarde 2 segundos.");
+                return;
+            }
+
+            try {
+                document.getElementById('status').innerText = "CONECTANDO...";
+                
+                // Configura se é quem fala (host) ou quem ouve (audience)
+                await rtcClient.setClientRole(papel);
+                
+                // Entra no canal
+                await rtcClient.join(appId, canal, null, null);
+
+                if (papel === 'host') {
+                    // Ativa Microfone
+                    localMic = await AgoraRTC.createMicrophoneAudioTrack({ encoderConfig: "high_quality_stereo" });
+                    await rtcClient.publish(localMic);
+                    document.getElementById('status').innerText = "VOCÊ ESTÁ TRANSMITINDO";
+                    document.getElementById('status').style.color = "#007bff";
+                } else {
+                    document.getElementById('status').innerText = "OUVINDO AGORA...";
+                    document.getElementById('status').style.color = "#28a745";
                 }
 
-                client.on("user-published", async (user, mediaType) => {
-                    await client.subscribe(user, mediaType);
+                // Esconde botões iniciais e mostra o de sair
+                document.querySelectorAll('.btn').forEach(b => b.style.display = 'none');
+                document.getElementById('sair').style.display = 'block';
+
+                // Lógica para receber áudio (essencial para o ouvinte)
+                rtcClient.on("user-published", async (user, mediaType) => {
+                    await rtcClient.subscribe(user, mediaType);
                     if (mediaType === "audio") {
                         user.audioTrack.play();
-                        document.getElementById('status').innerText = "Status: OUVINDO ÁUDIO...";
+                        document.getElementById('status').innerText = "ÁUDIO RECEBIDO AO VIVO";
                     }
                 });
 
             } catch (err) {
-                document.getElementById('status').innerText = "ERRO FATAL";
-                document.getElementById('log').innerText = "Erro: " + err.message + " | Causa: " + err.code;
-                alert("ERRO: " + err.message);
+                console.error(err);
+                alert("Erro de conexão: " + err.message);
+                document.getElementById('status').innerText = "FALHA NA CONEXÃO";
             }
         }
     </script>
