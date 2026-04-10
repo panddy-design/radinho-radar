@@ -2,44 +2,45 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scout Radio v7.0 - Final Fix</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Scout Radio App</title>
+    <link rel="manifest" href="manifest.json">
     <script src="https://8x8.vc/external_api.js"></script>
     <style>
         body { background: #000; color: #fff; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: #111; padding: 40px; border-radius: 30px; border: 1px solid #007bff; width: 340px; text-align: center; }
-        .btn { width: 100%; padding: 20px; margin: 10px 0; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        .app-card { background: #111; padding: 40px; border-radius: 30px; border: 1px solid #007bff; width: 320px; text-align: center; }
+        .btn { width: 100%; padding: 20px; margin: 10px 0; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 16px; }
         .scout { background: #007bff; color: white; }
         .ouvinte { background: #28a745; color: white; }
-        /* Botão pulsante para forçar o áudio */
-        .play-sound { background: #ff4757; color: white; display: none; box-shadow: 0 0 20px rgba(255, 71, 87, 0.6); }
-        #status { color: #ffcc00; margin-bottom: 20px; font-weight: bold; font-size: 14px; }
+        #status { color: #ffcc00; margin-bottom: 20px; font-size: 14px; }
+        #jitsi-container { display: none; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h2>SCOUT RADIO v7.0</h2>
-        <div id="status">SISTEMA AGUARDANDO</div>
+    <div class="app-card">
+        <h2>SCOUT APP v8.0</h2>
+        <div id="status">AGUARDANDO CONEXÃO</div>
 
-        <div id="menu">
-            <button class="btn scout" onclick="conectar(true)">INICIAR TRANSMISSÃO</button>
-            <button class="btn ouvinte" onclick="conectar(false)">ENTRAR COMO OUVINTE</button>
-        </div>
-
-        <button id="btnPlay" class="btn play-sound" onclick="forcarPlay()">CLIQUE PARA OUVIR O SCOUT</button>
-
-        <button class="btn" style="background:none; color:#444; font-size:11px" onclick="location.reload()">RESETAR PÁGINA</button>
+        <button class="btn scout" onclick="conectar(true)">TRANSMITIR AGORA</button>
+        <button class="btn ouvinte" onclick="conectar(false)">OUVIR RÁDIO</button>
+        
+        <button class="btn" style="background:#222; color:#555; font-size:10px;" onclick="location.reload()">RESETAR APP</button>
     </div>
 
-    <div id="jitsi-container" style="display:none;"></div>
+    <div id="jitsi-container"></div>
 
     <script>
+        // REGISTRA O SERVICE WORKER (Transforma em App)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+
         let api = null;
 
         function conectar(isScout) {
             const options = {
-                roomName: "SALA_SCOUT_FIX_999", 
+                roomName: "RADIO_SCOUT_PRIVATE_ROOM_99",
                 parentNode: document.querySelector('#jitsi-container'),
                 configOverwrite: {
                     startWithAudioMuted: !isScout,
@@ -47,32 +48,12 @@
                     prejoinPageEnabled: false
                 }
             };
-
             api = new JitsiMeetExternalAPI("8x8.vc", options);
-
-            document.getElementById('menu').style.display = 'none';
-            document.getElementById('status').innerText = isScout ? "VOCÊ ESTÁ FALANDO..." : "CONECTADO À SALA";
-
-            if (!isScout) {
-                // Para o ouvinte, mostramos o botão de "Play" para destravar o som
-                setTimeout(() => {
-                    document.getElementById('btnPlay').style.display = 'block';
-                    document.getElementById('status').innerText = "CLIQUE NO BOTÃO VERMELHO ABAIXO!";
-                }, 1000);
-            }
-        }
-
-        function forcarPlay() {
-            // O Jitsi API não tem um "play" direto, então nós mutamos e desmutamos 
-            // a entrada para forçar o navegador a reprocessar o áudio da sala.
-            if (api) {
-                api.executeCommand('toggleAudio'); 
-                setTimeout(() => {
-                    api.executeCommand('toggleAudio');
-                    document.getElementById('btnPlay').innerText = "ÁUDIO ATIVADO!";
-                    document.getElementById('btnPlay').style.background = "#28a745";
-                    document.getElementById('status').innerText = "RECEPÇÃO ATIVA";
-                }, 200);
+            document.getElementById('status').innerText = isScout ? "VOCÊ ESTÁ AO VIVO" : "OUVINDO SCOUT...";
+            
+            // Se for ouvinte, alerta para garantir foco no áudio
+            if(!isScout) {
+                setTimeout(() => { alert("Áudio conectado! Se estiver mudo, aumente o volume de 'Mídia' do celular."); }, 1500);
             }
         }
     </script>
