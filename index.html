@@ -3,95 +3,68 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scout Radio v11 (WebRTC direto)</title>
+<title>Scout Radio v12</title>
+
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
 <style>
-body { background:#000; color:#fff; font-family:sans-serif; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; }
-.card { background:#111; padding:30px; border-radius:20px; border:2px solid #28a745; width:320px; text-align:center; }
-.btn { width:100%; padding:18px; margin:10px 0; border:none; border-radius:12px; font-weight:bold; cursor:pointer; }
+body { background:#000; color:#fff; font-family:sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; }
+.card { background:#111; padding:30px; border-radius:20px; text-align:center; width:320px; }
+.btn { width:100%; padding:15px; margin:10px 0; border:none; border-radius:10px; font-weight:bold; cursor:pointer; }
 .scout { background:#007bff; color:#fff; }
 .ouvinte { background:#28a745; color:#fff; }
-#status { margin-top:10px; font-size:14px; color:#aaa; }
 </style>
 </head>
+
 <body>
 
 <div class="card">
-<h2>Scout Radio v11</h2>
-<div id="status">Aguardando...</div>
+<h2>Scout Radio</h2>
+<p id="status">Aguardando...</p>
 
 <button class="btn scout" onclick="startScout()">SCOUT (FALAR)</button>
 <button class="btn ouvinte" onclick="startListener()">OUVINTE (OUVIR)</button>
 </div>
 
 <script>
-let localStream;
 let peer;
-let ws;
+let conn;
+let myId = "sala-scout-123"; // FIXO (tipo canal de rádio)
 
-// servidor websocket simples (você precisa rodar um depois — explico abaixo)
-const WS_URL = "ws://localhost:3000";
-
-function log(msg){ document.getElementById('status').innerText = msg; }
-
+// SCOUT (quem fala)
 async function startScout() {
-    log("Pegando microfone...");
+    document.getElementById('status').innerText = "Iniciando transmissão...";
 
-    localStream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-    ws = new WebSocket(WS_URL);
+    peer = new Peer(myId);
 
-    ws.onopen = () => {
-        log("Conectado - aguardando ouvinte...");
-    };
+    peer.on('call', call => {
+        call.answer(stream);
+        document.getElementById('status').innerText = "Ouvinte conectado";
+    });
 
-    ws.onmessage = async (msg) => {
-        const data = JSON.parse(msg.data);
-
-        if (data.answer) {
-            await peer.setRemoteDescription(data.answer);
-            log("Transmitindo áudio");
-        }
-    };
-
-    peer = new RTCPeerConnection();
-
-    localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
-
-    const offer = await peer.createOffer();
-    await peer.setLocalDescription(offer);
-
-    ws.onopen = () => {
-        ws.send(JSON.stringify({ offer }));
-    };
+    document.getElementById('status').innerText = "Aguardando ouvintes...";
 }
 
-async function startListener() {
-    log("Conectando...");
+// OUVINTE (quem escuta)
+function startListener() {
+    document.getElementById('status').innerText = "Conectando...";
 
-    ws = new WebSocket(WS_URL);
+    peer = new Peer();
 
-    ws.onmessage = async (msg) => {
-        const data = JSON.parse(msg.data);
+    peer.on('open', id => {
+        const call = peer.call(myId, null);
 
-        if (data.offer) {
-            peer = new RTCPeerConnection();
+        call.on('stream', stream => {
+            const audio = new Audio();
+            audio.srcObject = stream;
+            audio.autoplay = true;
+            audio.play().catch(()=>{});
 
-            peer.ontrack = (event) => {
-                const audio = document.createElement('audio');
-                audio.srcObject = event.streams[0];
-                audio.autoplay = true;
-                audio.play().catch(()=>{});
-                log("Áudio recebendo");
-            };
-
-            await peer.setRemoteDescription(data.offer);
-
-            const answer = await peer.createAnswer();
-            await peer.setLocalDescription(answer);
-
-            ws.send(JSON.stringify({ answer }));
-        }
-    };
+            document.getElementById('status').innerText = "Áudio ao vivo 🔊";
+        });
+    });
 }
 </script>
 
