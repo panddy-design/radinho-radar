@@ -3,82 +3,95 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scout Radio v10</title>
-<script src="https://8x8.vc/external_api.js"></script>
+<title>Scout Radio v11 (WebRTC direto)</title>
 <style>
 body { background:#000; color:#fff; font-family:sans-serif; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; }
 .card { background:#111; padding:30px; border-radius:20px; border:2px solid #28a745; width:320px; text-align:center; }
 .btn { width:100%; padding:18px; margin:10px 0; border:none; border-radius:12px; font-weight:bold; cursor:pointer; }
 .scout { background:#007bff; color:#fff; }
 .ouvinte { background:#28a745; color:#fff; }
-.unlock { background:#ffc107; color:#000; display:none; }
-#jitsi-container { position:absolute; width:1px; height:1px; opacity:0; }
+#status { margin-top:10px; font-size:14px; color:#aaa; }
 </style>
 </head>
 <body>
 
 <div class="card">
-<h2>Scout Radio v10</h2>
+<h2>Scout Radio v11</h2>
 <div id="status">Aguardando...</div>
 
-<div id="menu">
-<button class="btn scout" onclick="conectar(true)">SCOUT (FALAR)</button>
-<button class="btn ouvinte" onclick="conectar(false)">OUVINTE</button>
+<button class="btn scout" onclick="startScout()">SCOUT (FALAR)</button>
+<button class="btn ouvinte" onclick="startListener()">OUVINTE (OUVIR)</button>
 </div>
-
-<button id="btnUnlock" class="btn unlock" onclick="ativarAudio()">ATIVAR ÁUDIO</button>
-</div>
-
-<div id="jitsi-container"></div>
 
 <script>
-let api;
+let localStream;
+let peer;
+let ws;
 
-function conectar(isScout) {
-    const domain = "8x8.vc";
-    const options = {
-        roomName: "SALA_SCOUT_FIX_2026",
-        parentNode: document.querySelector('#jitsi-container'),
-        configOverwrite: {
-            startWithAudioMuted: false,
-            startWithVideoMuted: true,
-            prejoinPageEnabled: false
-        },
-        interfaceConfigOverwrite: {
-            DISABLE_VIDEO_BACKGROUND: true
+// servidor websocket simples (você precisa rodar um depois — explico abaixo)
+const WS_URL = "ws://localhost:3000";
+
+function log(msg){ document.getElementById('status').innerText = msg; }
+
+async function startScout() {
+    log("Pegando microfone...");
+
+    localStream = await navigator.mediaDevices.getUserMedia({ audio:true });
+
+    ws = new WebSocket(WS_URL);
+
+    ws.onopen = () => {
+        log("Conectado - aguardando ouvinte...");
+    };
+
+    ws.onmessage = async (msg) => {
+        const data = JSON.parse(msg.data);
+
+        if (data.answer) {
+            await peer.setRemoteDescription(data.answer);
+            log("Transmitindo áudio");
         }
     };
 
-    api = new JitsiMeetExternalAPI(domain, options);
+    peer = new RTCPeerConnection();
 
-    document.getElementById('menu').style.display = 'none';
+    localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
 
-    if (isScout) {
-        document.getElementById('status').innerText = "Transmitindo...";
-    } else {
-        document.getElementById('status').innerText = "Clique para liberar áudio";
-        document.getElementById('btnUnlock').style.display = 'block';
-    }
+    const offer = await peer.createOffer();
+    await peer.setLocalDescription(offer);
 
-    // Força volume alto
-    api.addEventListener('videoConferenceJoined', () => {
-        api.executeCommand('setAudioMuted', false);
-    });
+    ws.onopen = () => {
+        ws.send(JSON.stringify({ offer }));
+    };
 }
 
-function ativarAudio() {
-    if (!api) return;
+async function startListener() {
+    log("Conectando...");
 
-    // Truque real pra autoplay policy (funciona melhor que toggle)
-    api.executeCommand('setAudioMuted', false);
+    ws = new WebSocket(WS_URL);
 
-    // cria áudio fake pra desbloquear contexto do navegador
-    const audio = new Audio();
-    audio.src = "data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAA...";
-    audio.play().catch(()=>{});
+    ws.onmessage = async (msg) => {
+        const data = JSON.parse(msg.data);
 
-    document.getElementById('status').innerText = "Áudio ativo";
-    document.getElementById('btnUnlock').style.display = 'none';
+        if (data.offer) {
+            peer = new RTCPeerConnection();
+
+            peer.ontrack = (event) => {
+                const audio = document.createElement('audio');
+                audio.srcObject = event.streams[0];
+                audio.autoplay = true;
+                audio.play().catch(()=>{});
+                log("Áudio recebendo");
+            };
+
+            await peer.setRemoteDescription(data.offer);
+
+            const answer = await peer.createAnswer();
+            await peer.setLocalDescription(answer);
+
+            ws.send(JSON.stringify({ answer }));
+        }
+    };
 }
 </script>
 
