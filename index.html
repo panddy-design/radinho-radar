@@ -3,51 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>V13.0</title>
+<title>Scout Radio Firebase</title>
 
-<script src="https://unpkg.com/@daily-co/daily-js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
 <style>
 body {
-  background:#000;
-  color:#fff;
-  font-family:sans-serif;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-  margin:0;
+    background:#000;
+    color:#fff;
+    font-family:sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
 }
-
 .card {
-  background:#111;
-  padding:30px;
-  border-radius:20px;
-  text-align:center;
-  width:320px;
-  border:2px solid #28a745;
+    background:#111;
+    padding:30px;
+    border-radius:20px;
+    text-align:center;
+    width:320px;
 }
-
-.btn {
-  width:100%;
-  padding:15px;
-  margin:10px 0;
-  border:none;
-  border-radius:10px;
-  font-weight:bold;
-  cursor:pointer;
-  font-size:16px;
+button {
+    width:100%;
+    padding:15px;
+    margin:10px 0;
+    border:none;
+    border-radius:10px;
+    font-weight:bold;
+    cursor:pointer;
 }
-
 .scout { background:#007bff; color:#fff; }
 .ouvinte { background:#28a745; color:#fff; }
-.unlock { background:#ffc107; color:#000; display:none; }
-
-#status {
-  margin:15px 0;
-  font-size:14px;
-  color:#aaa;
-}
 </style>
 </head>
 
@@ -55,72 +44,65 @@ body {
 
 <div class="card">
 <h2>Scout Radio 🔊</h2>
-
 <p id="status">Aguardando...</p>
 
-<button class="btn scout" onclick="entrar(true)">SCOUT (FALAR)</button>
-<button class="btn ouvinte" onclick="entrar(false)">OUVINTE (OUVIR)</button>
-
-<button id="btnUnlock" class="btn unlock" onclick="liberarAudio()">
-ATIVAR ÁUDIO 🔊
-</button>
+<button class="scout" onclick="startScout()">SCOUT (FALAR)</button>
+<button class="ouvinte" onclick="startListener()">OUVINTE (OUVIR)</button>
 </div>
 
 <script>
-const ROOM_URL = "https://panddy.daily.co/scout-radio";
+// 🔥 COLE SEUS DADOS AQUI
+const firebaseConfig = {
+    apiKey: "AIzaSyBIzfmq-5XDsQUJX8cSf5Uo0D41MUiTIRw",
+    authDomain: "scout-radio-5964e.firebaseapp.com",
+    projectId: "scout-radio-5964e",
+    storageBucket: "scout-radio-5964e.firebasestorage.app",
+};
 
-let call;
-let audioLiberado = false;
+// INIT
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const storage = firebase.storage();
 
-// ENTRAR NA SALA
-async function entrar(isScout) {
+let mediaRecorder;
 
-  if (call) return; // evita duplicação
+// 🎙️ SCOUT
+async function startScout() {
+    document.getElementById("status").innerText = "Transmitindo...";
 
-  document.getElementById('status').innerText = "Conectando...";
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-  call = DailyIframe.createCallObject();
+    mediaRecorder = new MediaRecorder(stream);
 
-  await call.join({ url: ROOM_URL });
+    mediaRecorder.ondataavailable = async (event) => {
+        const blob = event.data;
 
-  if (isScout) {
-    await call.setLocalAudio(true);
-    document.getElementById('status').innerText = "Transmitindo 🎙️";
-  } else {
-    await call.setLocalAudio(false);
-    document.getElementById('status').innerText = "Clique para ativar áudio";
-    document.getElementById('btnUnlock').style.display = "block";
-  }
+        const ref = storage.ref().child("audio/" + Date.now() + ".webm");
+        await ref.put(blob);
 
-  // RECEBER ÁUDIO (forma correta)
-  call.on('track-started', ev => {
-    if (ev.track.kind === 'audio') {
+        const url = await ref.getDownloadURL();
 
-      const audio = document.createElement('audio');
-      audio.srcObject = new MediaStream([ev.track]);
-      audio.autoplay = true;
-      audio.playsInline = true;
+        await db.collection("radio").doc("live").set({
+            audio: url,
+            time: Date.now()
+        });
+    };
 
-      // tenta tocar automaticamente
-      audio.play().catch(() => {
-        console.log("Autoplay bloqueado");
-      });
-
-      document.getElementById('status').innerText = "Áudio ao vivo 🔊";
-    }
-  });
+    mediaRecorder.start(2000); // envia a cada 2s
 }
 
-// BOTÃO DE LIBERAR ÁUDIO (mobile/Chrome)
-function liberarAudio() {
-  audioLiberado = true;
+// 🔊 OUVINTE
+function startListener() {
+    document.getElementById("status").innerText = "Ouvindo...";
 
-  const dummy = new Audio();
-  dummy.src = "data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAA";
-  dummy.play().catch(()=>{});
+    db.collection("radio").doc("live")
+    .onSnapshot(doc => {
+        const data = doc.data();
+        if (!data) return;
 
-  document.getElementById('btnUnlock').style.display = "none";
-  document.getElementById('status').innerText = "Áudio liberado 🔊";
+        const audio = new Audio(data.audio);
+        audio.play().catch(() => {});
+    });
 }
 </script>
 
