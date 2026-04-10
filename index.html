@@ -3,16 +3,51 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scout Radio Daily</title>
+<title>V13.0</title>
 
 <script src="https://unpkg.com/@daily-co/daily-js"></script>
 
 <style>
-body { background:#000; color:#fff; font-family:sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; }
-.card { background:#111; padding:30px; border-radius:20px; text-align:center; width:320px; }
-.btn { width:100%; padding:15px; margin:10px 0; border:none; border-radius:10px; font-weight:bold; cursor:pointer; }
+body {
+  background:#000;
+  color:#fff;
+  font-family:sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  margin:0;
+}
+
+.card {
+  background:#111;
+  padding:30px;
+  border-radius:20px;
+  text-align:center;
+  width:320px;
+  border:2px solid #28a745;
+}
+
+.btn {
+  width:100%;
+  padding:15px;
+  margin:10px 0;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+  font-size:16px;
+}
+
 .scout { background:#007bff; color:#fff; }
 .ouvinte { background:#28a745; color:#fff; }
+.unlock { background:#ffc107; color:#000; display:none; }
+
+#status {
+  margin:15px 0;
+  font-size:14px;
+  color:#aaa;
+}
 </style>
 </head>
 
@@ -20,47 +55,72 @@ body { background:#000; color:#fff; font-family:sans-serif; display:flex; justif
 
 <div class="card">
 <h2>Scout Radio 🔊</h2>
+
 <p id="status">Aguardando...</p>
 
 <button class="btn scout" onclick="entrar(true)">SCOUT (FALAR)</button>
 <button class="btn ouvinte" onclick="entrar(false)">OUVINTE (OUVIR)</button>
+
+<button id="btnUnlock" class="btn unlock" onclick="liberarAudio()">
+ATIVAR ÁUDIO 🔊
+</button>
 </div>
 
 <script>
-const ROOM_URL = "COLE_AQUI_SUA_URL_DAILY";
+const ROOM_URL = "https://panddy.daily.co/scout-radio";
 
 let call;
+let audioLiberado = false;
 
+// ENTRAR NA SALA
 async function entrar(isScout) {
-    document.getElementById('status').innerText = "Conectando...";
 
-    call = DailyIframe.createCallObject();
+  if (call) return; // evita duplicação
 
-    await call.join({
-        url: ROOM_URL
-    });
+  document.getElementById('status').innerText = "Conectando...";
 
-    if (isScout) {
-        // Scout fala
-        await call.setLocalAudio(true);
-        document.getElementById('status').innerText = "Transmitindo 🎙️";
-    } else {
-        // Ouvinte só escuta
-        await call.setLocalAudio(false);
-        document.getElementById('status').innerText = "Ouvindo 🔊";
+  call = DailyIframe.createCallObject();
+
+  await call.join({ url: ROOM_URL });
+
+  if (isScout) {
+    await call.setLocalAudio(true);
+    document.getElementById('status').innerText = "Transmitindo 🎙️";
+  } else {
+    await call.setLocalAudio(false);
+    document.getElementById('status').innerText = "Clique para ativar áudio";
+    document.getElementById('btnUnlock').style.display = "block";
+  }
+
+  // RECEBER ÁUDIO (forma correta)
+  call.on('track-started', ev => {
+    if (ev.track.kind === 'audio') {
+
+      const audio = document.createElement('audio');
+      audio.srcObject = new MediaStream([ev.track]);
+      audio.autoplay = true;
+      audio.playsInline = true;
+
+      // tenta tocar automaticamente
+      audio.play().catch(() => {
+        console.log("Autoplay bloqueado");
+      });
+
+      document.getElementById('status').innerText = "Áudio ao vivo 🔊";
     }
+  });
+}
 
-    // Receber áudio
-    call.on('participant-updated', ev => {
-        const p = ev.participant;
+// BOTÃO DE LIBERAR ÁUDIO (mobile/Chrome)
+function liberarAudio() {
+  audioLiberado = true;
 
-        if (p.audio && p.audioTrack) {
-            const audio = new Audio();
-            audio.srcObject = new MediaStream([p.audioTrack]);
-            audio.autoplay = true;
-            audio.play().catch(()=>{});
-        }
-    });
+  const dummy = new Audio();
+  dummy.src = "data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAA";
+  dummy.play().catch(()=>{});
+
+  document.getElementById('btnUnlock').style.display = "none";
+  document.getElementById('status').innerText = "Áudio liberado 🔊";
 }
 </script>
 
