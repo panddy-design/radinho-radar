@@ -3,28 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rádio Scout - Jitsi Mode</title>
+    <title>Scout Radio v5.0</title>
     <script src="https://8x8.vc/external_api.js"></script>
     <style>
-        body { background: #0b0b0b; color: #fff; font-family: sans-serif; text-align: center; padding: 20px; }
-        .container { background: #1a1a1a; padding: 30px; border-radius: 20px; border: 1px solid #333; max-width: 400px; margin: auto; }
-        .btn { width: 100%; padding: 20px; margin: 10px 0; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 18px; }
+        body { background: #050505; color: white; font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: #111; padding: 30px; border-radius: 25px; border: 1px solid #333; text-align: center; width: 320px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        h2 { color: #007bff; margin-bottom: 20px; }
+        .btn { width: 100%; padding: 18px; margin: 10px 0; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
         .scout { background: #007bff; color: white; }
         .ouvinte { background: #28a745; color: white; }
-        #jitsi-container { width: 100%; height: 0; overflow: hidden; } /* Escondido pois só queremos o áudio */
-        #status { color: #ffcc00; margin: 20px 0; font-weight: bold; }
+        .panic { background: #ffc107; color: black; display: none; }
+        #status { font-size: 12px; color: #666; margin-top: 15px; }
+        #jitsi-container { display: none; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2>RÁDIO SCOUT v4.0</h2>
-        <div id="status">SISTEMA JITSI PRONTO</div>
+    <div class="card">
+        <h2>Scout Radio</h2>
+        <div id="status">SISTEMA PRONTO</div>
 
-        <button class="btn scout" onclick="iniciarRadio(true)">SOU SCOUT (FALAR)</button>
-        <button class="btn ouvinte" onclick="iniciarRadio(false)">SOU OUVINTE (OUVIR)</button>
+        <button id="btnScout" class="btn scout" onclick="start(true)">SOU SCOUT (FALAR)</button>
+        <button id="btnOuvinte" class="btn ouvinte" onclick="start(false)">SOU OUVINTE (OUVIR)</button>
         
-        <button class="btn" style="background:#444;" onclick="location.reload()">REINICIAR</button>
+        <button id="btnPanic" class="btn panic" onclick="fixAudio()">ESTOU SEM ÁUDIO (CLIQUE AQUI)</button>
+
+        <button class="btn" style="background:#222; color:#888; font-size:12px" onclick="location.reload()">RESETAR</button>
     </div>
 
     <div id="jitsi-container"></div>
@@ -32,33 +36,36 @@
     <script>
         let api = null;
 
-        function iniciarRadio(isScout) {
-            const domain = "8x8.vc"; // Servidor estável do Jitsi
+        function start(isScout) {
             const options = {
-                roomName: "scoutpro", // Mude esse nome para algo único
-                width: "100%",
-                height: 0, // Mantém escondido
+                roomName: "RADIO_SCOUT_PRO_FIXED_2024", // Nome fixo da sala
                 parentNode: document.querySelector('#jitsi-container'),
                 configOverwrite: {
-                    startWithAudioMuted: !isScout, // Se for ouvinte, entra mudo
-                    startWithVideoMuted: true,     // Rádio, sem vídeo
-                    prejoinPageEnabled: false      // Entra direto
-                },
-                interfaceConfigOverwrite: {
-                    TOOLBAR_BUTTONS: [] // Remove botões
+                    startWithAudioMuted: !isScout,
+                    startWithVideoMuted: true,
+                    prejoinPageEnabled: false,
+                    disableRemoteMute: true
                 }
             };
 
-            document.getElementById('status').innerText = isScout ? "TRANSMITINDO..." : "OUVINDO...";
-            document.getElementById('status').style.color = isScout ? "#007bff" : "#28a745";
+            api = new JitsiMeetExternalAPI("8x8.vc", options);
 
-            // Inicializa a rádio
-            api = new JitsiMeetExternalAPI(domain, options);
+            document.getElementById('btnScout').style.display = 'none';
+            document.getElementById('btnOuvinte').style.display = 'none';
+            document.getElementById('status').innerText = isScout ? "VOCÊ ESTÁ TRANSMITINDO" : "OUVINDO AGORA...";
+            
+            if(!isScout) {
+                document.getElementById('btnPanic').style.display = 'block';
+            }
+        }
 
-            // Se for ouvinte, garante que o som não está mutado localmente
-            if (!isScout) {
-                api.executeCommand('muteAudio', true); // Garante que o ouvinte não fale
-                alert("Conectado! Você ouvirá o Scout assim que ele falar.");
+        // Função mágica para "acordar" o áudio do navegador
+        function fixAudio() {
+            if (api) {
+                // Força o mudo e desmudo para reativar o driver de som do navegador
+                api.executeCommand('toggleAudio');
+                setTimeout(() => api.executeCommand('toggleAudio'), 500);
+                alert("Áudio reiniciado. Verifique se o volume do Windows/PC está alto.");
             }
         }
     </script>
