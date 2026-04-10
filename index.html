@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scout Radio v12</title>
+<title>Scout Radio Daily</title>
 
-<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<script src="https://unpkg.com/@daily-co/daily-js"></script>
 
 <style>
 body { background:#000; color:#fff; font-family:sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; }
@@ -19,51 +19,47 @@ body { background:#000; color:#fff; font-family:sans-serif; display:flex; justif
 <body>
 
 <div class="card">
-<h2>Scout Radio</h2>
+<h2>Scout Radio 🔊</h2>
 <p id="status">Aguardando...</p>
 
-<button class="btn scout" onclick="startScout()">SCOUT (FALAR)</button>
-<button class="btn ouvinte" onclick="startListener()">OUVINTE (OUVIR)</button>
+<button class="btn scout" onclick="entrar(true)">SCOUT (FALAR)</button>
+<button class="btn ouvinte" onclick="entrar(false)">OUVINTE (OUVIR)</button>
 </div>
 
 <script>
-let peer;
-let conn;
-let myId = "sala-scout-123"; // FIXO (tipo canal de rádio)
+const ROOM_URL = "COLE_AQUI_SUA_URL_DAILY";
 
-// SCOUT (quem fala)
-async function startScout() {
-    document.getElementById('status').innerText = "Iniciando transmissão...";
+let call;
 
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-    peer = new Peer(myId);
-
-    peer.on('call', call => {
-        call.answer(stream);
-        document.getElementById('status').innerText = "Ouvinte conectado";
-    });
-
-    document.getElementById('status').innerText = "Aguardando ouvintes...";
-}
-
-// OUVINTE (quem escuta)
-function startListener() {
+async function entrar(isScout) {
     document.getElementById('status').innerText = "Conectando...";
 
-    peer = new Peer();
+    call = DailyIframe.createCallObject();
 
-    peer.on('open', id => {
-        const call = peer.call(myId, null);
+    await call.join({
+        url: ROOM_URL
+    });
 
-        call.on('stream', stream => {
+    if (isScout) {
+        // Scout fala
+        await call.setLocalAudio(true);
+        document.getElementById('status').innerText = "Transmitindo 🎙️";
+    } else {
+        // Ouvinte só escuta
+        await call.setLocalAudio(false);
+        document.getElementById('status').innerText = "Ouvindo 🔊";
+    }
+
+    // Receber áudio
+    call.on('participant-updated', ev => {
+        const p = ev.participant;
+
+        if (p.audio && p.audioTrack) {
             const audio = new Audio();
-            audio.srcObject = stream;
+            audio.srcObject = new MediaStream([p.audioTrack]);
             audio.autoplay = true;
             audio.play().catch(()=>{});
-
-            document.getElementById('status').innerText = "Áudio ao vivo 🔊";
-        });
+        }
     });
 }
 </script>
